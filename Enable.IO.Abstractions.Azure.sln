@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B11D4C93-7364-42F3-92F0-5A982B3B07DD}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		CodeMaid.config = CodeMaid.config
+		CONTRIBUTING.md = CONTRIBUTING.md
+		CustomExtendedCorrectnessRules.ruleset = CustomExtendedCorrectnessRules.ruleset
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{403DD635-6CB8-4E7A-83C4-1BFA31A90D45}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B073ED3C-0E26-423D-B82A-6812DAC8BD40}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.IO.Abstractions.Azure", "src\Enable.IO.Abstractions.Azure\Enable.IO.Abstractions.Azure.csproj", "{F0518597-1A17-4E6F-AF58-C1036893F457}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.IO.Abstractions.Azure.Test", "test\Enable.IO.Abstractions.Azure.Test\Enable.IO.Abstractions.Azure.Test.csproj", "{D786E74D-0ACD-4F06-83CC-762BBEC938F5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F0518597-1A17-4E6F-AF58-C1036893F457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0518597-1A17-4E6F-AF58-C1036893F457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0518597-1A17-4E6F-AF58-C1036893F457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0518597-1A17-4E6F-AF58-C1036893F457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F0518597-1A17-4E6F-AF58-C1036893F457} = {403DD635-6CB8-4E7A-83C4-1BFA31A90D45}
+		{D786E74D-0ACD-4F06-83CC-762BBEC938F5} = {B073ED3C-0E26-423D-B82A-6812DAC8BD40}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F188369E-98D9-4D69-A672-E293071B848F}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,22 @@
+version: 0.1.{build}
+configuration: Release
+
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+
+before_build:
+  - cmd: nuget restore -verbosity quiet
+
+build:
+  parallel: true
+  publish_nuget: true
+  verbosity: minimal
+
+test:
+  assemblies: '**\*.Test.dll'
+
+deploy: off

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>$id$</id>
+        <version>$version$</version>
+        <authors>$author$</authors>
+        <owners>Enable</owners>
+        <licenseUrl>https://raw.githubusercontent.com/EnableSoftware/Enable.IO.Abstractions.Azure/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/EnableSoftware/Enable.IO.Abstractions.Azure</projectUrl>
+        <iconUrl>https://github.com/EnableSoftware.png</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>$description$</description>
+        <copyright>Copyright 2017</copyright>
+        <dependencies>
+            <dependency id="Enable.IO.Abstractions"
+                        version="0.1.1" />
+        </dependencies>
+    </metadata>
+</package>
