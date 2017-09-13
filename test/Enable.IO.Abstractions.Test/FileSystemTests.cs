@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Enable.IO.Abstractions;
 using Xunit;
 
-namespace Enable.Transactions
+namespace Enable.IO.Abstractions.Test
 {
     public class FileSystemTests : IDisposable
     {
@@ -109,8 +109,20 @@ namespace Enable.Transactions
         [Fact]
         public async Task GetFileInfoAsync()
         {
-            // TODO
-            await _sut.GetFileInfoAsync(string.Empty);
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            CreateTestFile(_directory, fileName);
+
+            var expectedFileInfo = new FileInfo(Path.Combine(_directory, fileName));
+
+            // Act
+            var fileInfo = await _sut.GetFileInfoAsync(fileName);
+
+            // Assert
+            Assert.Equal(expectedFileInfo.CreationTimeUtc, fileInfo.Created);
+            Assert.Equal(expectedFileInfo.LastWriteTimeUtc, fileInfo.Modified);
+            Assert.Equal(expectedFileInfo.FullName, fileInfo.Path);
         }
 
         [Fact]
@@ -127,30 +139,28 @@ namespace Enable.Transactions
         public async Task CanGetFileListAsync()
         {
             // Arrange
-            // TODO Generate random number of files.
-            var fileName = Path.GetRandomFileName();
-
-            CreateTestFile(_directory, fileName);
+            var filesCount = CreateRandomNumber();
+            CreateTestFiles(_directory, filesCount);
 
             // Act
             var result = await _sut.GetFileListAsync("*");
 
             // Assert
-            Assert.Collection(
-                result,
-                (file) => Assert.EndsWith(fileName, file.Path));
+            Assert.Equal(filesCount, result.Count());
         }
 
         [Fact]
         public async Task CanSearchFileListAsync()
         {
             // Arrange
-            // TODO Generate random number of files.
-            var fileName = Path.GetRandomFileName();
+            var filesCount = CreateRandomNumber();
+            CreateTestFiles(_directory, filesCount);
 
-            CreateTestFile(_directory, fileName);
+            var expectedFileName = Path.GetRandomFileName();
 
-            var searchTerm = string.Empty;
+            CreateTestFile(_directory, expectedFileName);
+
+            var searchTerm = expectedFileName;
 
             // Act
             var result = await _sut.GetFileListAsync(searchTerm);
@@ -158,7 +168,7 @@ namespace Enable.Transactions
             // Assert
             Assert.Collection(
                 result,
-                (file) => Assert.EndsWith(fileName, file.Path));
+                (file) => Assert.EndsWith(expectedFileName, file.Path));
         }
 
         [Fact]
@@ -299,6 +309,27 @@ namespace Enable.Transactions
         private static string CreateRandomString()
         {
             return Guid.NewGuid().ToString();
+        }
+
+        private static int CreateRandomNumber()
+        {
+            var rng = new Random();
+            return rng.Next(byte.MaxValue);
+        }
+
+        private static void CreateTestFiles(string directory, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                CreateTestFile(directory);
+            }
+        }
+
+        private static void CreateTestFile(string directory)
+        {
+            var fileName = Path.GetRandomFileName();
+
+            CreateTestFile(directory, fileName);
         }
 
         private static void CreateTestFile(string directory, string fileName)
