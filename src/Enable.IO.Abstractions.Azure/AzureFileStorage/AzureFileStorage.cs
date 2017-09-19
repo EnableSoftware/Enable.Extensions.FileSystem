@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
@@ -92,26 +91,8 @@ namespace Enable.IO.Abstractions
         {
             var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
 
-            var fileList = new List<IFile>();
-
-            FileContinuationToken token = null;
-
-            do
-            {
-                // TODO `searchPattern` is not used here.
-                // TODO Implement paging.
-                var result = await directory.ListFilesAndDirectoriesSegmentedAsync(token, cancellationToken);
-
-                var files = result.Results.OfType<CloudFile>()
-                    .Select(o => new AzureFile(o));
-
-                fileList.AddRange(files);
-
-                token = result.ContinuationToken;
-            }
-            while (token != null);
-
-            return fileList;
+            // TODO `searchPattern` is not used here.
+            return new AzureFileEnumerator(directory, cancellationToken);
         }
 
         public async Task<Stream> GetFileStreamAsync(
@@ -177,25 +158,6 @@ namespace Enable.IO.Abstractions
             await directory.CreateIfNotExistsAsync(cancellationToken);
 
             return directory;
-        }
-
-        private class AzureFile : IFile
-        {
-            public AzureFile(CloudFile file)
-            {
-                Path = file.Name;
-
-                // There are no properties on an Azure File that can tell us the created time of the file.
-                Created = default(DateTimeOffset).UtcDateTime;
-
-                Modified = file.Properties.LastModified.GetValueOrDefault().UtcDateTime;
-            }
-
-            public string Path { get; private set; }
-
-            public DateTimeOffset Created { get; private set; }
-
-            public DateTimeOffset Modified { get; private set; }
         }
     }
 }

@@ -1,9 +1,17 @@
 ﻿using System;
+using System.Configuration;
+using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Enable.IO.Abstractions.Test
 {
+    /// <summary>
+    /// Tests for the Azure Blob Storage file storage implementation.
+    /// </summary>
+    /// <remarks>
+    /// These tests currently require the Azure Storage Emulator to be running.
+    /// </remarks>
     public class AzureBlobStorageTests : IDisposable
     {
         private readonly AzureBlobStorage _sut;
@@ -12,7 +20,9 @@ namespace Enable.IO.Abstractions.Test
 
         public AzureBlobStorageTests()
         {
-            _sut = new AzureBlobStorage(string.Empty, string.Empty);
+            var connectionString = ConfigurationManager.AppSettings.Get("StorageConnectionString");
+
+            _sut = new AzureBlobStorage(connectionString, "container");
         }
 
         [Fact]
@@ -46,9 +56,16 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public Task ExistsAsync_ReturnsFalseIfFileDoesNotExist()
+        public async Task ExistsAsync_ReturnsFalseIfFileDoesNotExist()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            // Act
+            var result = await _sut.ExistsAsync(fileName);
+
+            // Assert
+            Assert.False(result);
         }
 
         [Fact]
@@ -58,9 +75,13 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public Task GetFileListAsync_ReturnsEmptyList()
+        public async Task GetFileListAsync_ReturnsEmptyList()
         {
-            throw new NotImplementedException();
+            // Act
+            var result = await _sut.GetFileListAsync("*");
+
+            // Assert
+            Assert.Empty(result);
         }
 
         [Fact]

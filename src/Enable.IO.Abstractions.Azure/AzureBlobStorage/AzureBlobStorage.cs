@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
@@ -89,26 +88,8 @@ namespace Enable.IO.Abstractions
         {
             await _container.CreateIfNotExistsAsync(cancellationToken);
 
-            var blobList = new List<IFile>();
-
-            BlobContinuationToken token = null;
-
-            do
-            {
-                // TODO `searchPattern` is not used here.
-                // TODO Implement paging.
-                var result = await _container.ListBlobsSegmentedAsync(token, cancellationToken);
-
-                var blobs = result.Results.OfType<CloudBlockBlob>()
-                    .Select(o => new AzureBlob(o));
-
-                blobList.AddRange(blobs);
-
-                token = result.ContinuationToken;
-            }
-            while (token != null);
-
-            return blobList;
+            // TODO `searchPattern` is not used here.
+            return new AzureBlobEnumerator(_container, cancellationToken);
         }
 
         public async Task<Stream> GetFileStreamAsync(
@@ -133,7 +114,7 @@ namespace Enable.IO.Abstractions
 
             // It is not currently possible to rename a blob in Azure. We
             // therefore attempt a copy and then delete. Note, however, that
-            // `CopyFileAsync` may throw an exception event if the copy is
+            // `CopyFileAsync` may throw an exception if the copy is still
             // pending. It is therefore possible to end up with two blobs.
             await CopyFileAsync(sourcePath, targetPath, cancellationToken);
             await sourceBlob.DeleteIfExistsAsync(cancellationToken);
@@ -159,25 +140,6 @@ namespace Enable.IO.Abstractions
 
         protected virtual void Dispose(bool disposing)
         {
-        }
-
-        private class AzureBlob : IFile
-        {
-            public AzureBlob(CloudBlockBlob blob)
-            {
-                Path = blob.Name;
-
-                // There are no properties on an Azure Blob that can tell us the created time of the file.
-                Created = default(DateTimeOffset).UtcDateTime;
-
-                Modified = blob.Properties.LastModified.GetValueOrDefault().UtcDateTime;
-            }
-
-            public string Path { get; private set; }
-
-            public DateTimeOffset Created { get; private set; }
-
-            public DateTimeOffset Modified { get; private set; }
         }
     }
 }

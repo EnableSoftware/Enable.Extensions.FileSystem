@@ -78,12 +78,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AzureBlobStorage.cs" />
+    <Compile Include="AzureBlobStorage\AzureBlob.cs" />
+    <Compile Include="AzureFileStorage\AzureFile.cs" />
+    <Compile Include="AzureFileStorage\AzureFileEnumerator.cs" />
+    <Compile Include="AzureBlobStorage\AzureBlobEnumerator.cs" />
+    <Compile Include="AzureBlobStorage\AzureBlobStorage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="AzureFileStorage.cs" />
+    <Compile Include="AzureFileStorage\AzureFileStorage.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Enable.IO.Abstractions.Azure.nuspec" />
   </ItemGroup>

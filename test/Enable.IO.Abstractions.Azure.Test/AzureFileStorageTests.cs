@@ -4,6 +4,13 @@ using Xunit;
 
 namespace Enable.IO.Abstractions.Test
 {
+    /// <summary>
+    /// Tests for the Azure File Storage file storage implementation.
+    /// </summary>
+    /// <remarks>
+    /// These tests are not currently implemented, since the Azure Storage Emulator does not yet
+    /// support Azure File Storage.
+    /// </remarks>
     public class AzureFileStorageTests : IDisposable
     {
         private readonly AzureFileStorage _sut;
