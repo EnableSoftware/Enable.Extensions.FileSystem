@@ -9,14 +9,22 @@ namespace Enable.IO.Abstractions
     {
         public NotFoundFile(string path)
         {
+            Name = path;
         }
 
+        /// <inheritdoc />
         public bool Exists => false;
 
-        public DateTimeOffset Created => DateTimeOffset.MinValue;
+        /// <inheritdoc />
+        public DateTimeOffset LastModified => DateTimeOffset.MinValue;
 
-        public DateTimeOffset Modified => DateTimeOffset.MinValue;
+        /// <inheritdoc />
+        public long Length => -1;
 
+        /// <inheritdoc />
+        public string Name { get; }
+
+        /// <inheritdoc />
         public string Path => null;
     }
 }

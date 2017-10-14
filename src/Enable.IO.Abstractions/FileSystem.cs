@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Enable.IO.Abstractions.Internal;
 
 namespace Enable.IO.Abstractions
 {
@@ -143,25 +144,6 @@ namespace Enable.IO.Abstractions
         {
             // TODO Ensure that we don't walk out of the root directory.
             return Path.Combine(_directory, path);
-        }
-
-        private class FileSystemFile : IFile
-        {
-            public FileSystemFile(FileInfo fileInfo)
-            {
-                Exists = fileInfo.Exists;
-                Path = fileInfo.FullName;
-                Created = fileInfo.CreationTimeUtc;
-                Modified = fileInfo.LastWriteTimeUtc;
-            }
-
-            public bool Exists { get; private set; }
-
-            public string Path { get; private set; }
-
-            public DateTimeOffset Created { get; private set; }
-
-            public DateTimeOffset Modified { get; private set; }
         }
     }
 }

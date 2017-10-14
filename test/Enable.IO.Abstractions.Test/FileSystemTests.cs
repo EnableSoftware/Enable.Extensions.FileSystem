@@ -117,13 +117,26 @@ namespace Enable.IO.Abstractions.Test
             var expectedFileInfo = new FileInfo(Path.Combine(_directory, fileName));
 
             // Act
-            var fileInfo = await _sut.GetFileInfoAsync(fileName);
+            var result = await _sut.GetFileInfoAsync(fileName);
 
             // Assert
-            Assert.Equal(expectedFileInfo.CreationTimeUtc, fileInfo.Created);
-            Assert.Equal(expectedFileInfo.Exists, fileInfo.Exists);
-            Assert.Equal(expectedFileInfo.LastWriteTimeUtc, fileInfo.Modified);
-            Assert.Equal(expectedFileInfo.FullName, fileInfo.Path);
+            Assert.True(result.Exists);
+            Assert.Equal(expectedFileInfo.LastWriteTimeUtc, result.LastModified);
+            Assert.Equal(expectedFileInfo.Length, result.Length);
+            Assert.Equal(expectedFileInfo.Name, result.Name);
+            Assert.Equal(expectedFileInfo.FullName, result.Path);
+        }
+        [Fact]
+        public async Task GetFileInfoAsync_ReturnsNotFoundFileIfFileDoesNotExist()
+        {
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            // Act
+            var result = await _sut.GetFileInfoAsync(fileName);
+
+            // Assert
+            Assert.False(result.Exists);
         }
 
         [Fact]
