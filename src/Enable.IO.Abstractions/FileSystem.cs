@@ -75,16 +75,12 @@ namespace Enable.IO.Abstractions
         }
 
         public Task<IEnumerable<IFile>> GetFileListAsync(
-            string searchPattern = null,
+            string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            if (string.IsNullOrEmpty(searchPattern))
-            {
-                searchPattern = "*";
-            }
+            var directoryInfo = new DirectoryInfo(GetFullPath(path));
 
-            var files = Directory.GetFiles(_directory, searchPattern, SearchOption.TopDirectoryOnly)
-                .Select(o => new FileInfo(o))
+            var files = directoryInfo.GetFiles("*", SearchOption.TopDirectoryOnly)
                 .Select(o => new FileSystemFile(o))
                 .ToList();
 

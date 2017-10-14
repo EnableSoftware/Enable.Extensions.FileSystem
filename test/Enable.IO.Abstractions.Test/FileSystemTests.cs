@@ -129,7 +129,7 @@ namespace Enable.IO.Abstractions.Test
         public async Task GetFileListAsync_ReturnsEmptyList()
         {
             // Act
-            var result = await _sut.GetFileListAsync("*");
+            var result = await _sut.GetFileListAsync(string.Empty);
 
             // Assert
             Assert.Empty(result);
@@ -143,32 +143,10 @@ namespace Enable.IO.Abstractions.Test
             CreateTestFiles(_directory, filesCount);
 
             // Act
-            var result = await _sut.GetFileListAsync("*");
+            var result = await _sut.GetFileListAsync(string.Empty);
 
             // Assert
             Assert.Equal(filesCount, result.Count());
-        }
-
-        [Fact]
-        public async Task CanSearchFileListAsync()
-        {
-            // Arrange
-            var filesCount = CreateRandomNumber();
-            CreateTestFiles(_directory, filesCount);
-
-            var expectedFileName = Path.GetRandomFileName();
-
-            CreateTestFile(_directory, expectedFileName);
-
-            var searchTerm = expectedFileName;
-
-            // Act
-            var result = await _sut.GetFileListAsync(searchTerm);
-
-            // Assert
-            Assert.Collection(
-                result,
-                (file) => Assert.EndsWith(expectedFileName, file.Path));
         }
 
         [Fact]

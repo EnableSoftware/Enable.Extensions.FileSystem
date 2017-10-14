@@ -27,7 +27,7 @@ namespace Enable.IO.Abstractions
             CancellationToken cancellationToken = default(CancellationToken));
 
         Task<IEnumerable<IFile>> GetFileListAsync(
-            string searchPattern = null,
+            string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
         Task<Stream> GetFileStreamAsync(
