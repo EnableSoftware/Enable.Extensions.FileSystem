@@ -50,15 +50,6 @@ namespace Enable.IO.Abstractions
             return Task.CompletedTask;
         }
 
-        public Task<bool> ExistsAsync(
-            string path,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var exists = File.Exists(GetFullPath(path));
-
-            return Task.FromResult(exists);
-        }
-
         /// <summary>
         /// Locate a file at the given subpath by directly mapping path segments to physical directories.
         /// </summary>

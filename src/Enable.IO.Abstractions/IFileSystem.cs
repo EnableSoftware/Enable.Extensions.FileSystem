@@ -18,10 +18,6 @@ namespace Enable.IO.Abstractions
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task<bool> ExistsAsync(
-            string path,
-            CancellationToken cancellationToken = default(CancellationToken));
-
         Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));

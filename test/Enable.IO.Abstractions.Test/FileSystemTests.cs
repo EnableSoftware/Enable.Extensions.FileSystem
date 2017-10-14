@@ -35,8 +35,8 @@ namespace Enable.IO.Abstractions.Test
             await _sut.CopyFileAsync(source, target);
 
             // Assert
-            Assert.True(await _sut.ExistsAsync(source));
-            Assert.True(await _sut.ExistsAsync(target));
+            Assert.True(await ExistsAsync(source));
+            Assert.True(await ExistsAsync(target));
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Enable.IO.Abstractions.Test
             await _sut.DeleteFileAsync(fileName);
 
             // Assert
-            Assert.False(await _sut.ExistsAsync(fileName));
+            Assert.False(await ExistsAsync(fileName));
         }
 
         [Fact]
@@ -76,34 +76,6 @@ namespace Enable.IO.Abstractions.Test
 
             // Act
             await _sut.DeleteFileAsync(fileName);
-        }
-
-        [Fact]
-        public async Task CanCheckExistsAsync()
-        {
-            // Arrange
-            var fileName = Path.GetRandomFileName();
-
-            CreateTestFile(_directory, fileName);
-
-            // Act
-            var result = await _sut.ExistsAsync(fileName);
-
-            // Asert
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task ExistsAsync_ReturnsFalseIfFileDoesNotExist()
-        {
-            // Arrange
-            var fileName = Path.GetRandomFileName();
-
-            // Act
-            var result = await _sut.ExistsAsync(fileName);
-
-            // Assert
-            Assert.False(result);
         }
 
         [Fact]
@@ -223,8 +195,8 @@ namespace Enable.IO.Abstractions.Test
             await _sut.RenameFileAsync(source, target);
 
             // Assert
-            Assert.False(await _sut.ExistsAsync(source));
-            Assert.True(await _sut.ExistsAsync(target));
+            Assert.False(await ExistsAsync(source));
+            Assert.True(await ExistsAsync(target));
         }
 
         [Fact]
@@ -336,6 +308,13 @@ namespace Enable.IO.Abstractions.Test
             var path = Path.Combine(directory, fileName);
 
             File.WriteAllText(path, contents);
+        }
+
+        private async Task<bool> ExistsAsync(string path)
+        {
+            var fileInfo = await _sut.GetFileInfoAsync(path);
+
+            return fileInfo.Exists;
         }
     }
 }
