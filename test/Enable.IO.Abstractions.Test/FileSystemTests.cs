@@ -121,6 +121,7 @@ namespace Enable.IO.Abstractions.Test
 
             // Assert
             Assert.Equal(expectedFileInfo.CreationTimeUtc, fileInfo.Created);
+            Assert.Equal(expectedFileInfo.Exists, fileInfo.Exists);
             Assert.Equal(expectedFileInfo.LastWriteTimeUtc, fileInfo.Modified);
             Assert.Equal(expectedFileInfo.FullName, fileInfo.Path);
         }

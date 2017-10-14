@@ -58,20 +58,25 @@ namespace Enable.IO.Abstractions
             return Task.FromResult(exists);
         }
 
+        /// <summary>
+        /// Locate a file at the given subpath by directly mapping path segments to physical directories.
+        /// </summary>
+        /// <param name="path">A path under the root directory.</param>
+        /// <returns>The file information. Callers must check <see cref="IFile.Exists"/>.
         public Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var fileInfo = new FileInfo(GetFullPath(path));
+            var fullPath = GetFullPath(path);
 
-            if (!fileInfo.Exists)
+            if (fullPath == null)
             {
-                return Task.FromResult<IFile>(null);
+                return Task.FromResult<IFile>(new NotFoundFile(path));
             }
 
-            var file = new FileSystemFile(fileInfo);
+            var fileInfo = new FileInfo(fullPath);
 
-            return Task.FromResult<IFile>(file);
+            return Task.FromResult<IFile>(new FileSystemFile(fileInfo));
         }
 
         public Task<IEnumerable<IFile>> GetFileListAsync(
@@ -144,10 +149,13 @@ namespace Enable.IO.Abstractions
         {
             public FileSystemFile(FileInfo fileInfo)
             {
+                Exists = fileInfo.Exists;
                 Path = fileInfo.FullName;
                 Created = fileInfo.CreationTimeUtc;
                 Modified = fileInfo.LastWriteTimeUtc;
             }
+
+            public bool Exists { get; private set; }
 
             public string Path { get; private set; }
 
