@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Enable.Extensions.FileSystem.Test
+namespace Enable.Extensions.FileSystem.Physical.Tests
 {
     public class FileSystemTests : IDisposable
     {

@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Enable.Extensions.FileSystem.Internal.Test
+namespace Enable.Extensions.FileSystem.Physical.Internal.Tests
 {
     public class PathHelperTests
     {

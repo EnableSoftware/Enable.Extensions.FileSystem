@@ -19,9 +19,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{403DD635-6CB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B073ED3C-0E26-423D-B82A-6812DAC8BD40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.Extensions.FileSystem", "src\Enable.Extensions.FileSystem\Enable.Extensions.FileSystem.csproj", "{F0518597-1A17-4E6F-AF58-C1036893F457}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.Extensions.FileSystem.Abstractions", "src\Enable.Extensions.FileSystem.Abstractions\Enable.Extensions.FileSystem.Abstractions.csproj", "{F0518597-1A17-4E6F-AF58-C1036893F457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.Extensions.FileSystem.Test", "test\Enable.Extensions.FileSystem.Test\Enable.Extensions.FileSystem.Test.csproj", "{D786E74D-0ACD-4F06-83CC-762BBEC938F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.Extensions.FileSystem.Physical.Tests", "test\Enable.Extensions.FileSystem.Physical.Tests\Enable.Extensions.FileSystem.Physical.Tests.csproj", "{D786E74D-0ACD-4F06-83CC-762BBEC938F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.Extensions.FileSystem.Physical", "src\Enable.Extensions.FileSystem.Physical\Enable.Extensions.FileSystem.Physical.csproj", "{12FA65AC-C6B5-428B-8C4E-2963A201C07A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,6 +39,10 @@ Global
 		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12FA65AC-C6B5-428B-8C4E-2963A201C07A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12FA65AC-C6B5-428B-8C4E-2963A201C07A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12FA65AC-C6B5-428B-8C4E-2963A201C07A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12FA65AC-C6B5-428B-8C4E-2963A201C07A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +50,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F0518597-1A17-4E6F-AF58-C1036893F457} = {403DD635-6CB8-4E7A-83C4-1BFA31A90D45}
 		{D786E74D-0ACD-4F06-83CC-762BBEC938F5} = {B073ED3C-0E26-423D-B82A-6812DAC8BD40}
+		{12FA65AC-C6B5-428B-8C4E-2963A201C07A} = {403DD635-6CB8-4E7A-83C4-1BFA31A90D45}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F188369E-98D9-4D69-A672-E293071B848F}

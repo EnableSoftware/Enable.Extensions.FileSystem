@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Enable.Extensions.FileSystem.Internal
+namespace Enable.Extensions.FileSystem.Physical.Internal
 {
     internal static class PathHelper
     {

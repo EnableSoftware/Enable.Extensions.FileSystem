@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Enable.Extensions.FileSystem.Internal;
+using Enable.Extensions.FileSystem.Physical.Internal;
 
 namespace Enable.Extensions.FileSystem
 {

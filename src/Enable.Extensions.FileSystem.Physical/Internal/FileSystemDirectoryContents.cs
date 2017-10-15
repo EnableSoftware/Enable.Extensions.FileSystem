@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Enable.Extensions.FileSystem.Internal
+namespace Enable.Extensions.FileSystem.Physical.Internal
 {
     /// <summary>
     /// Represents the contents of a physical file system directory
