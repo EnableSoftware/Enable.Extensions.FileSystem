@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
     /// <summary>
     /// Represents a non-existant directory.

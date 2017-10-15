@@ -2,9 +2,9 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Enable.IO.Abstractions.Internal;
+using Enable.Extensions.FileSystem.Internal;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
     /// <summary>
     /// Represents a physical, on-disk file system.

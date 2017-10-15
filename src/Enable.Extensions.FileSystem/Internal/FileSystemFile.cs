@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Enable.IO.Abstractions.Internal
+namespace Enable.Extensions.FileSystem.Internal
 {
     /// <summary>
     /// Represents a file on a physical file system.

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
     /// <summary>
     /// Represents the contents of a file system directory.

@@ -5,8 +5,8 @@
         <version>$version$</version>
         <authors>$author$</authors>
         <owners>Enable</owners>
-        <licenseUrl>https://raw.githubusercontent.com/EnableSoftware/Enable.IO.Abstractions/master/LICENSE</licenseUrl>
-        <projectUrl>https://github.com/EnableSoftware/Enable.IO.Abstractions</projectUrl>
+        <licenseUrl>https://raw.githubusercontent.com/EnableSoftware/Enable.Extensions.FileSystem/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/EnableSoftware/Enable.Extensions.FileSystem</projectUrl>
         <iconUrl>https://github.com/EnableSoftware.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>$description$</description>

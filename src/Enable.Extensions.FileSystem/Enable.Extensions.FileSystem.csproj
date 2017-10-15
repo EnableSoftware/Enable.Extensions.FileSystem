@@ -7,8 +7,8 @@
     <ProjectGuid>{F0518597-1A17-4E6F-AF58-C1036893F457}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Enable.IO.Abstractions</RootNamespace>
-    <AssemblyName>Enable.IO.Abstractions</AssemblyName>
+    <RootNamespace>Enable.Extensions.FileSystem</RootNamespace>
+    <AssemblyName>Enable.Extensions.FileSystem</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Enable.IO.Abstractions.nuspec" />
+    <None Include="Enable.Extensions.FileSystem.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\packages\StyleCop.Analyzers.1.0.2\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />

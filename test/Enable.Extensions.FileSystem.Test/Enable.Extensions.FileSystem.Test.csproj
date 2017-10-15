@@ -8,8 +8,8 @@
     <ProjectGuid>{D786E74D-0ACD-4F06-83CC-762BBEC938F5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Enable.IO.Abstractions</RootNamespace>
-    <AssemblyName>Enable.IO.Abstractions.Test</AssemblyName>
+    <RootNamespace>Enable.Extensions.FileSystem</RootNamespace>
+    <AssemblyName>Enable.Extensions.FileSystem.Test</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -59,9 +59,9 @@
     <Compile Include="FileSystemTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Enable.IO.Abstractions\Enable.IO.Abstractions.csproj">
+    <ProjectReference Include="..\..\src\Enable.Extensions.FileSystem\Enable.Extensions.FileSystem.csproj">
       <Project>{f0518597-1a17-4e6f-af58-c1036893f457}</Project>
-      <Name>Enable.IO.Abstractions</Name>
+      <Name>Enable.Extensions.FileSystem</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

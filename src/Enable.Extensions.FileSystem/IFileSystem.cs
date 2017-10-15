@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
     public interface IFileSystem : IDisposable
     {
