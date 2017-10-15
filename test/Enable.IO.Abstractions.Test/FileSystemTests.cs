@@ -23,7 +23,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task CanCopyFileAsync()
+        public async Task CopyFileAsync_SucceedsIfSourceFileExists()
         {
             // Arrange
             var source = Path.GetRandomFileName();
@@ -40,7 +40,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task CopyFileAsync_ThrowsIfFileDoesNotExist()
+        public async Task CopyFileAsync_ThrowsIfSourceFileDoesNotExist()
         {
             // Arrange
             var source = Path.GetRandomFileName();
@@ -54,7 +54,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task CanDeleteFileAsync()
+        public async Task DeleteFileAsync_SucceedsIfFileExists()
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
@@ -79,7 +79,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task GetFileInfoAsync()
+        public async Task GetFileInfoAsync_ReturnsFileInfoIfFileExists()
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
@@ -112,7 +112,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task GetFileListAsync_ReturnsEmptyList()
+        public async Task GetFileListAsync_ReturnsEmptyListForEmptyDirectory()
         {
             // Act
             var result = await _sut.GetFileListAsync(string.Empty);
@@ -122,7 +122,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task CanGetFileListAsync()
+        public async Task GetFileListAsync_ReturnsFileList()
         {
             // Arrange
             var filesCount = CreateRandomNumber();
@@ -136,7 +136,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task CanGetFileStreamAsync()
+        public async Task GetFileStreamAsync_ReturnsFileStreamIfFileExists()
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
@@ -183,7 +183,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task CanRenameFileAsync()
+        public async Task RenameFileAsync_SucceedsIfSourceFileExists()
         {
             // Arrange
             var source = Path.GetRandomFileName();
@@ -214,7 +214,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public async Task CanSaveFileAsync()
+        public async Task SaveFileAsync_Succeeds()
         {
             // Arrange
             var contents = CreateRandomString();
