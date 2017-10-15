@@ -50,6 +50,25 @@ namespace Enable.IO.Abstractions
             return Task.CompletedTask;
         }
 
+        public Task<IDirectoryContents> GetDirectoryContentsAsync(
+            string path,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var fullPath = GetFullPath(path);
+
+            if (fullPath == null)
+            {
+                return Task.FromResult<IDirectoryContents>(
+                    new NotFoundDirectoryContents(path));
+            }
+
+            var directoryInfo = new DirectoryInfo(fullPath);
+
+            var directoryContents = new FileSystemDirectoryContents(directoryInfo);
+
+            return Task.FromResult<IDirectoryContents>(directoryContents);
+        }
+
         /// <summary>
         /// Locate a file at the given subpath by directly mapping path segments to physical directories.
         /// </summary>
@@ -69,19 +88,6 @@ namespace Enable.IO.Abstractions
             var fileInfo = new FileInfo(fullPath);
 
             return Task.FromResult<IFile>(new FileSystemFile(fileInfo));
-        }
-
-        public Task<IEnumerable<IFile>> GetFileListAsync(
-            string path,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var directoryInfo = new DirectoryInfo(GetFullPath(path));
-
-            var files = directoryInfo.GetFiles("*", SearchOption.TopDirectoryOnly)
-                .Select(o => new FileSystemFile(o))
-                .ToList();
-
-            return Task.FromResult<IEnumerable<IFile>>(files);
         }
 
         public Task<Stream> GetFileStreamAsync(

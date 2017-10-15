@@ -23,6 +23,9 @@ namespace Enable.IO.Abstractions.Internal
         public bool Exists => _fileInfo.Exists;
 
         /// <inheritdoc />
+        public bool IsDirectory => false;
+
+        /// <inheritdoc />
         public DateTimeOffset LastModified => _fileInfo.LastWriteTimeUtc;
 
         /// <inheritdoc />

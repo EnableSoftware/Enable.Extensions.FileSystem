@@ -16,6 +16,9 @@ namespace Enable.IO.Abstractions
         public bool Exists => false;
 
         /// <inheritdoc />
+        public bool IsDirectory => false;
+
+        /// <inheritdoc />
         public DateTimeOffset LastModified => DateTimeOffset.MinValue;
 
         /// <inheritdoc />

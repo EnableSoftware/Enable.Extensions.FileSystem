@@ -79,6 +79,43 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
+        public async Task GetDirectoryContentsAsync_ReturnsEmptyListForEmptyDirectory()
+        {
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(string.Empty);
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task GetDirectoryContentsAsync_ReturnsFileList()
+        {
+            // Arrange
+            var filesCount = CreateRandomNumber();
+            CreateTestFiles(_directory, filesCount);
+
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(string.Empty);
+
+            // Assert
+            Assert.Equal(filesCount, result.Count());
+        }
+
+        [Fact]
+        public async Task GetDirectoryContentsAsync_ReturnsNotFoundDirectoryIfDirectoryDoesNotExist()
+        {
+            // Arrange
+            var path = Path.GetRandomFileName();
+
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(path);
+
+            // Assert
+            Assert.False(result.Exists);
+        }
+
+        [Fact]
         public async Task GetFileInfoAsync_ReturnsFileInfoIfFileExists()
         {
             // Arrange
@@ -93,11 +130,13 @@ namespace Enable.IO.Abstractions.Test
 
             // Assert
             Assert.True(result.Exists);
+            Assert.False(result.IsDirectory);
             Assert.Equal(expectedFileInfo.LastWriteTimeUtc, result.LastModified);
             Assert.Equal(expectedFileInfo.Length, result.Length);
             Assert.Equal(expectedFileInfo.Name, result.Name);
             Assert.Equal(expectedFileInfo.FullName, result.Path);
         }
+
         [Fact]
         public async Task GetFileInfoAsync_ReturnsNotFoundFileIfFileDoesNotExist()
         {
@@ -109,30 +148,6 @@ namespace Enable.IO.Abstractions.Test
 
             // Assert
             Assert.False(result.Exists);
-        }
-
-        [Fact]
-        public async Task GetFileListAsync_ReturnsEmptyListForEmptyDirectory()
-        {
-            // Act
-            var result = await _sut.GetFileListAsync(string.Empty);
-
-            // Assert
-            Assert.Empty(result);
-        }
-
-        [Fact]
-        public async Task GetFileListAsync_ReturnsFileList()
-        {
-            // Arrange
-            var filesCount = CreateRandomNumber();
-            CreateTestFiles(_directory, filesCount);
-
-            // Act
-            var result = await _sut.GetFileListAsync(string.Empty);
-
-            // Assert
-            Assert.Equal(filesCount, result.Count());
         }
 
         [Fact]

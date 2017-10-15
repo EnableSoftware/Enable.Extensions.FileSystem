@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -18,11 +17,16 @@ namespace Enable.IO.Abstractions
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task<IFile> GetFileInfoAsync(
+        /// <summary>
+        /// Enumerate a directory at the given path, if any.
+        /// </summary>
+        /// <param name="path">Relative path that identifies the directory.</param>
+        /// <returns>Returns the contents of the directory.</returns>
+        Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task<IEnumerable<IFile>> GetFileListAsync(
+        Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
