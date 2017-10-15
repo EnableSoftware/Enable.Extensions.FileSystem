@@ -1,32 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Enable.IO.Abstractions.Internal;
 
 namespace Enable.IO.Abstractions
 {
+    /// <summary>
+    /// Represents a physical, on-disk file system.
+    /// </summary>
     public class FileSystem : IFileSystem
     {
         private readonly string _directory;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FileSystem"/> class.
+        /// </summary>
+        /// <param name="directory">The root directory to represent. This must be an existing, absolute path.</param>
+        /// <remarks>
+        /// This class represents a directory, and the files and directories located under this "root" directory.
+        /// </remarks>
         public FileSystem(string directory)
         {
             if (!Path.IsPathRooted(directory))
             {
-                directory = Path.GetFullPath(directory);
+                throw new ArgumentException("The path supplied must be an absolute path.", nameof(directory));
             }
 
-            if (!directory.EndsWith("\\", StringComparison.Ordinal))
+            var root = Path.GetFullPath(directory);
+
+            root = PathHelper.EnsureTrailingPathSeparator(root);
+
+            if (!Directory.Exists(root))
             {
-                directory += "\\";
+                throw new DirectoryNotFoundException(root);
             }
 
-            Directory.CreateDirectory(directory);
-
-            _directory = directory;
+            _directory = root;
         }
 
         public Task CopyFileAsync(
@@ -137,10 +147,37 @@ namespace Enable.IO.Abstractions
         {
         }
 
+        /// <summary>
+        /// Expand a path relative to the root directory, ensuring that the path does not walk out of the root directory.
+        /// </summary>
+        /// <remarks>
+        /// Absolute or otherwise invalid paths return a null value.
+        /// </remarks>
         private string GetFullPath(string path)
         {
-            // TODO Ensure that we don't walk out of the root directory.
-            return Path.Combine(_directory, path);
+            try
+            {
+                // Absolute paths not permitted. This will throw if
+                // path contains invalid characters.
+                if (Path.IsPathRooted(path))
+                {
+                    return null;
+                }
+
+                var fullPath = PathHelper.GetFullPath(_directory, path);
+
+                // Subpaths must be within sub-directoryies of the root directry.
+                if (!PathHelper.IsUnderneathRoot(_directory, fullPath))
+                {
+                    return null;
+                }
+
+                return fullPath;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

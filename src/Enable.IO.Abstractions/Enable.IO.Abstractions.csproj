@@ -47,6 +47,7 @@
     <Compile Include="Internal\FileSystemDirectory.cs" />
     <Compile Include="Internal\FileSystemDirectoryContents.cs" />
     <Compile Include="Internal\FileSystemFile.cs" />
+    <Compile Include="Internal\PathHelper.cs" />
     <Compile Include="NotFoundDirectoryContents.cs" />
     <Compile Include="NotFoundFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

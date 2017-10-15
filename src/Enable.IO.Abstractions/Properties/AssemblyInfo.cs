@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Enable.IO.Abstractions")]
@@ -9,3 +10,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 [assembly: AssemblyVersion("0.1.*")]
+[assembly: InternalsVisibleTo("Enable.IO.Abstractions.Test")]
