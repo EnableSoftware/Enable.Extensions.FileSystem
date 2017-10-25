@@ -59,6 +59,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureFileStorageTests.cs" />
+    <Compile Include="AzureStorageEmulatorFixture.cs" />
+    <Compile Include="AzureStorageEmulatorManager.cs" />
+    <Compile Include="AzureStorageEmulatorManagerTests.cs" />
+    <Compile Include="ProcessExecutor.cs" />
+    <Compile Include="ProcessResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AzureBlobStorageTests.cs" />
   </ItemGroup>

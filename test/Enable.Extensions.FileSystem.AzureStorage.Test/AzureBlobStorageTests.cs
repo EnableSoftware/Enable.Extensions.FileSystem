@@ -12,17 +12,32 @@ namespace Enable.Extensions.FileSystem.Test
     /// <remarks>
     /// These tests currently require the Azure Storage Emulator to be running.
     /// </remarks>
-    public class AzureBlobStorageTests : IDisposable
+    [CollectionDefinition("Azure Storage Integration Tests")]
+    public class AzureBlobStorageTests : IClassFixture<AzureStorageEmulatorFixture>, IDisposable
     {
+        private readonly AzureStorageEmulatorFixture _fixture;
+
         private readonly AzureBlobStorage _sut;
 
         private bool _disposed;
 
-        public AzureBlobStorageTests()
+        public AzureBlobStorageTests(AzureStorageEmulatorFixture fixture)
         {
+            _fixture = fixture;
+
             var connectionString = ConfigurationManager.AppSettings.Get("StorageConnectionString");
 
             _sut = new AzureBlobStorage(connectionString, "container");
+        }
+
+        [Fact]
+        public async Task VerifyAzureStorageEmulatorIsRunning()
+        {
+            // Act
+            var isRunning = await _fixture.AzureStorageEmulator.GetIsEmulatorRunning();
+
+            // Assert
+            Assert.True(isRunning);
         }
 
         [Fact]
