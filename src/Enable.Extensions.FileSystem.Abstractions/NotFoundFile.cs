@@ -3,7 +3,7 @@ using System;
 namespace Enable.Extensions.FileSystem
 {
     /// <summary>
-    /// Represents a non-existant file.
+    /// Represents a non-existent file.
     /// </summary>
     public class NotFoundFile : IFile
     {

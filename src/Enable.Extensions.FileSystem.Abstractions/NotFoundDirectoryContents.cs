@@ -5,7 +5,7 @@ using System.Linq;
 namespace Enable.Extensions.FileSystem
 {
     /// <summary>
-    /// Represents a non-existant directory.
+    /// Represents a non-existent directory.
     /// </summary>
     public class NotFoundDirectoryContents : IDirectoryContents
     {
