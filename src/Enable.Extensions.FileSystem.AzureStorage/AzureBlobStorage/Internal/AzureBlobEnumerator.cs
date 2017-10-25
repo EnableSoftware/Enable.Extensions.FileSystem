@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Enable.Extensions.FileSystem
+namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {
     internal class AzureBlobEnumerator : IEnumerable<IFile>, IEnumerator<IFile>
     {

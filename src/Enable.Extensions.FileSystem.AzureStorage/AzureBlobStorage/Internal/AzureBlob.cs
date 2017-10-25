@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Enable.Extensions.FileSystem
+namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {
     internal class AzureBlob : IFile
     {

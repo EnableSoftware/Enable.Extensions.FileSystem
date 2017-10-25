@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.WindowsAzure.Storage.File;
 
-namespace Enable.Extensions.FileSystem
+namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {
     /// <summary>
     /// Represents a directory in Azure File Storage.

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Enable.Extensions.FileSystem
+namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {
     /// <summary>
     /// Represents the contents of a Azure File Storage directory.

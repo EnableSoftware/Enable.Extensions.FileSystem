@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.WindowsAzure.Storage.File;
 
-namespace Enable.Extensions.FileSystem
+namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {
     internal class AzureFileEnumerator : IEnumerable<IFile>, IEnumerator<IFile>
     {
