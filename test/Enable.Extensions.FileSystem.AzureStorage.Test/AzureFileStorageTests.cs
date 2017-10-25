@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage;
 using Xunit;
 
 namespace Enable.Extensions.FileSystem.Test
@@ -23,7 +24,10 @@ namespace Enable.Extensions.FileSystem.Test
         {
             var connectionString = ConfigurationManager.AppSettings.Get("StorageConnectionString");
 
-            _sut = new AzureFileStorage(connectionString, "share", "directory");
+            var account = CloudStorageAccount.Parse(connectionString);
+            var client = account.CreateCloudFileClient();
+
+            _sut = new AzureFileStorage(client, "share", "directory");
         }
 
         [Fact]

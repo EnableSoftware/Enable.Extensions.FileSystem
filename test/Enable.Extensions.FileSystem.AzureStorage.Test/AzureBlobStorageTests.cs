@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage;
 using Xunit;
 
 namespace Enable.Extensions.FileSystem.Test
@@ -27,7 +28,10 @@ namespace Enable.Extensions.FileSystem.Test
 
             var connectionString = ConfigurationManager.AppSettings.Get("StorageConnectionString");
 
-            _sut = new AzureBlobStorage(connectionString, "container");
+            var account = CloudStorageAccount.Parse(connectionString);
+            var client = account.CreateCloudBlobClient();
+
+            _sut = new AzureBlobStorage(client, "container");
         }
 
         [Fact]

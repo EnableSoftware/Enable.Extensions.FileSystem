@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Enable.Extensions.FileSystem.AzureStorage.Internal;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Enable.Extensions.FileSystem
@@ -12,10 +13,22 @@ namespace Enable.Extensions.FileSystem
     {
         private readonly CloudBlobContainer _container;
 
-        public AzureBlobStorage(string connectionString, string containerName)
+        public AzureBlobStorage(string accountName, string accountKey, string containerName)
         {
-            var account = CloudStorageAccount.Parse(connectionString);
-            var client = account.CreateCloudBlobClient();
+            var credentials = new StorageCredentials(accountName, accountKey);
+            var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
+
+            var client = storageAccount.CreateCloudBlobClient();
+
+            _container = client.GetContainerReference(containerName);
+        }
+
+        public AzureBlobStorage(CloudBlobClient client, string containerName)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
 
             _container = client.GetContainerReference(containerName);
         }

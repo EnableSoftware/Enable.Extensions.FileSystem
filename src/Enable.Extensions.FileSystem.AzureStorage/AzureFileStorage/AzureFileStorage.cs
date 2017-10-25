@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Enable.Extensions.FileSystem.AzureStorage.Internal;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.File;
 
@@ -14,10 +15,23 @@ namespace Enable.Extensions.FileSystem
         private readonly CloudFileShare _share;
         private readonly string _directory;
 
-        public AzureFileStorage(string connectionString, string shareName, string directory)
+        public AzureFileStorage(string accountName, string accountKey, string shareName, string directory)
         {
-            var account = CloudStorageAccount.Parse(connectionString);
-            var client = account.CreateCloudFileClient();
+            var credentials = new StorageCredentials(accountName, accountKey);
+            var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
+
+            var client = storageAccount.CreateCloudFileClient();
+
+            _share = client.GetShareReference(shareName);
+            _directory = directory;
+        }
+
+        public AzureFileStorage(CloudFileClient client, string shareName, string directory)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
 
             _share = client.GetShareReference(shareName);
             _directory = directory;
