@@ -128,11 +128,6 @@ namespace Enable.Extensions.FileSystem
         {
             using (var fileStream = File.Create(GetFullPath(path)))
             {
-                if (stream.CanSeek)
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                }
-
                 await stream.CopyToAsync(fileStream);
             }
         }
