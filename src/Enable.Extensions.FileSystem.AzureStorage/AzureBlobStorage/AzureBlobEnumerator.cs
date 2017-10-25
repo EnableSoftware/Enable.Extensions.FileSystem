@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.WindowsAzure.Storage.File;
+using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
-    internal class AzureFileEnumerator : IEnumerable<IFile>, IEnumerator<IFile>
+    internal class AzureBlobEnumerator : IEnumerable<IFile>, IEnumerator<IFile>
     {
-        private readonly CloudFileDirectory _directory;
+        private readonly CloudBlobDirectory _directory;
         private readonly CancellationToken _cancellationToken;
 
-        private FileContinuationToken _continuationToken = null;
+        private BlobContinuationToken _continuationToken = null;
         private IEnumerator<IFile> _currentSegment = null;
 
-        internal AzureFileEnumerator(
-            CloudFileDirectory directory,
+        internal AzureBlobEnumerator(
+            CloudBlobDirectory directory,
             CancellationToken cancellationToken)
         {
             _directory = directory;
@@ -72,16 +72,16 @@ namespace Enable.IO.Abstractions
                     return false;
                 }
 
-                var response = _directory.ListFilesAndDirectoriesSegmentedAsync(_continuationToken, _cancellationToken)
+                // TODO How should this handle virtual directories?
+                var response = _directory.ListBlobsSegmentedAsync(_continuationToken, _cancellationToken)
                     .GetAwaiter()
                     .GetResult();
 
                 _continuationToken = response.ContinuationToken;
 
-                // TODO How should this handle directories?
                 _currentSegment = response.Results
-                    .OfType<CloudFile>()
-                    .Select(o => new AzureFile(o))
+                    .OfType<CloudBlockBlob>()
+                    .Select(o => new AzureBlob(o))
                     .GetEnumerator();
 
                 return _currentSegment.MoveNext();

@@ -1,29 +1,32 @@
 ﻿using System;
+using System.Configuration;
+using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Enable.IO.Abstractions.Test
+namespace Enable.Extensions.FileSystem.Test
 {
     /// <summary>
-    /// Tests for the Azure File Storage file storage implementation.
+    /// Tests for the Azure Blob Storage file storage implementation.
     /// </summary>
     /// <remarks>
-    /// These tests are not currently implemented, since the Azure Storage Emulator does not yet
-    /// support Azure File Storage.
+    /// These tests currently require the Azure Storage Emulator to be running.
     /// </remarks>
-    public class AzureFileStorageTests : IDisposable
+    public class AzureBlobStorageTests : IDisposable
     {
-        private readonly AzureFileStorage _sut;
+        private readonly AzureBlobStorage _sut;
 
         private bool _disposed;
 
-        public AzureFileStorageTests()
+        public AzureBlobStorageTests()
         {
-            _sut = new AzureFileStorage(string.Empty, string.Empty, string.Empty);
+            var connectionString = ConfigurationManager.AppSettings.Get("StorageConnectionString");
+
+            _sut = new AzureBlobStorage(connectionString, "container");
         }
 
         [Fact]
-        public Task CanCopyFileAsync()
+        public Task CopyFileAsync_SucceedsIfSourceFileExists()
         {
             throw new NotImplementedException();
         }
@@ -35,7 +38,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public Task CanDeleteFileAsync()
+        public Task DeleteFileAsync_SucceedsIfSourceFileExists()
         {
             throw new NotImplementedException();
         }
@@ -47,43 +50,55 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public Task CanCheckExistsAsync()
+        public async Task GetDirectoryContentsAsync_ReturnsEmptyListForEmptyDirectory()
+        {
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(string.Empty);
+
+            // Assert
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public Task GetDirectoryContentsAsync_ReturnsFileList()
         {
             throw new NotImplementedException();
         }
 
         [Fact]
-        public Task ExistsAsync_ReturnsFalseIfFileDoesNotExist()
+        public async Task GetDirectoryContentsAsync_ReturnsNotFoundDirectoryIfDirectoryDoesNotExist()
+        {
+            // Arrange
+            var path = Path.GetRandomFileName();
+
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(path);
+
+            // Assert
+            Assert.False(result.Exists);
+        }
+
+        [Fact]
+        public Task GetFileInfoAsync_ReturnsFileInfoIfFileExists()
         {
             throw new NotImplementedException();
         }
 
         [Fact]
-        public Task GetFileInfoAsync()
+        public async Task GetFileInfoAsync_ReturnsNotFoundFileIfFileDoesNotExist()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            // Act
+            var result = await _sut.GetFileInfoAsync(fileName);
+
+            // Assert
+            Assert.False(result.Exists);
         }
 
         [Fact]
-        public Task GetFileListAsync_ReturnsEmptyList()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Fact]
-        public Task CanGetFileListAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Fact]
-        public Task CanSearchFileListAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        [Fact]
-        public Task CanGetFileStreamAsync()
+        public Task GetFileStreamAsync_ReturnsFileStreamIfFileExists()
         {
             throw new NotImplementedException();
         }
@@ -101,7 +116,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public Task CanRenameFileAsync()
+        public Task RenameFileAsync_SucceedsIfSourceFileExists()
         {
             throw new NotImplementedException();
         }
@@ -113,7 +128,7 @@ namespace Enable.IO.Abstractions.Test
         }
 
         [Fact]
-        public Task CanSaveFileAsync()
+        public Task SaveFileAsync_Succeeds()
         {
             throw new NotImplementedException();
         }

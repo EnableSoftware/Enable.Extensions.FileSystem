@@ -1,5 +1,6 @@
-# Enable.IO.Abstractions.Azure
+# Enable.Extensions.FileSystem.AzureStorage
 
-An Azure implementation of the [Enable.IO.Abstractions] file system abstractions.
+An Azure Storage implementation of the [Enable.Extensions.FileSystem][Enable.Extensions.FileSystem]
+file system abstractions.
 
-[Enable.IO.Abstractions](https://github.com/EnableSoftware/Enable.IO.Abstractions)
+[Enable.Extensions.FileSystem]: https://github.com/EnableSoftware/Enable.Extensions.FileSystem

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +6,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.File;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
     public class AzureFileStorage : IFileSystem
     {
@@ -59,17 +58,24 @@ namespace Enable.IO.Abstractions
             await file.DeleteIfExistsAsync(cancellationToken);
         }
 
-        public async Task<bool> ExistsAsync(
+        public async Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
 
-            var file = directory.GetFileReference(path);
+            // TODO Do we need to fetch directory attributes?
+            // See `directory.FetchAttributesAsync(cancellationToken)`.
+            var directoryContents = new AzureFileStorageDirectoryContents(directory);
 
-            return await file.ExistsAsync(cancellationToken);
+            return directoryContents;
         }
 
+        /// <summary>
+        /// Locate a file at the given subpath by directly mapping path segments to Azure File Storage directories.
+        /// </summary>
+        /// <param name="path">A path under the root file share.</param>
+        /// <returns>The file information. Callers must check <see cref="IFile.Exists"/>.
         public async Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -78,21 +84,19 @@ namespace Enable.IO.Abstractions
 
             var file = directory.GetFileReference(path);
 
-            await file.FetchAttributesAsync(cancellationToken);
+            try
+            {
+                await file.FetchAttributesAsync(cancellationToken);
 
-            var fileInfo = new AzureFile(file);
+                var fileInfo = new AzureFile(file);
 
-            return fileInfo;
-        }
-
-        public async Task<IEnumerable<IFile>> GetFileListAsync(
-            string searchPattern = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
-
-            // TODO `searchPattern` is not used here.
-            return new AzureFileEnumerator(directory, cancellationToken);
+                return fileInfo;
+            }
+            catch (StorageException)
+            {
+                // TODO Here we should only be catching errors when the file is not found.
+                return new NotFoundFile(path);
+            }
         }
 
         public async Task<Stream> GetFileStreamAsync(

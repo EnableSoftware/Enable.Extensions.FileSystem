@@ -5,15 +5,15 @@
         <version>$version$</version>
         <authors>$author$</authors>
         <owners>Enable</owners>
-        <licenseUrl>https://raw.githubusercontent.com/EnableSoftware/Enable.IO.Abstractions.Azure/master/LICENSE</licenseUrl>
-        <projectUrl>https://github.com/EnableSoftware/Enable.IO.Abstractions.Azure</projectUrl>
+        <licenseUrl>https://raw.githubusercontent.com/EnableSoftware/Enable.Extensions.FileSystem.AzureStorage/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/EnableSoftware/Enable.Extensions.FileSystem.AzureStorage</projectUrl>
         <iconUrl>https://github.com/EnableSoftware.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>$description$</description>
         <copyright>Copyright 2017</copyright>
         <dependencies>
-            <dependency id="Enable.IO.Abstractions"
-                        version="0.1.1" />
+            <dependency id="Enable.Extensions.FileSystem"
+                        version="0.1.3" />
         </dependencies>
     </metadata>
 </package>

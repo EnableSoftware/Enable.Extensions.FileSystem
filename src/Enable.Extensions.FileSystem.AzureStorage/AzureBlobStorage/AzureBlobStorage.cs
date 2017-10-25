@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
     public class AzureBlobStorage : IFileSystem
     {
@@ -56,15 +55,19 @@ namespace Enable.IO.Abstractions
             await blob.DeleteIfExistsAsync(cancellationToken);
         }
 
-        public async Task<bool> ExistsAsync(
+        public async Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             await _container.CreateIfNotExistsAsync(cancellationToken);
 
-            var blob = _container.GetBlockBlobReference(path);
+            var directory = _container.GetDirectoryReference(path);
 
-            return await blob.ExistsAsync(cancellationToken);
+            // TODO Do we need to fetch directory attributes?
+            // See `directory.FetchAttributesAsync(cancellationToken)`.
+            var directoryContents = new AzureBlobStorageDirectoryContents(directory);
+
+            return directoryContents;
         }
 
         public async Task<IFile> GetFileInfoAsync(
@@ -75,21 +78,19 @@ namespace Enable.IO.Abstractions
 
             var blob = _container.GetBlockBlobReference(path);
 
-            await blob.FetchAttributesAsync(cancellationToken);
+            try
+            {
+                await blob.FetchAttributesAsync(cancellationToken);
 
-            var blobInfo = new AzureBlob(blob);
+                var blobInfo = new AzureBlob(blob);
 
-            return blobInfo;
-        }
-
-        public async Task<IEnumerable<IFile>> GetFileListAsync(
-            string searchPattern = null,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
-
-            // TODO `searchPattern` is not used here.
-            return new AzureBlobEnumerator(_container, cancellationToken);
+                return blobInfo;
+            }
+            catch (StorageException)
+            {
+                // TODO Here we should only be catching errors when the file is not found.
+                return new NotFoundFile(path);
+            }
         }
 
         public async Task<Stream> GetFileStreamAsync(

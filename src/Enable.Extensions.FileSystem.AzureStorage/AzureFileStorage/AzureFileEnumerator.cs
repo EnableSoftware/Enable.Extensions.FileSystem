@@ -1,24 +1,25 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.WindowsAzure.Storage.File;
 
-namespace Enable.IO.Abstractions
+namespace Enable.Extensions.FileSystem
 {
-    internal class AzureBlobEnumerator : IEnumerable<IFile>, IEnumerator<IFile>
+    internal class AzureFileEnumerator : IEnumerable<IFile>, IEnumerator<IFile>
     {
-        private readonly CloudBlobContainer _container;
+        private readonly CloudFileDirectory _directory;
         private readonly CancellationToken _cancellationToken;
 
-        private BlobContinuationToken _continuationToken = null;
+        private FileContinuationToken _continuationToken = null;
         private IEnumerator<IFile> _currentSegment = null;
 
-        internal AzureBlobEnumerator(
-            CloudBlobContainer container,
+        internal AzureFileEnumerator(
+            CloudFileDirectory directory,
             CancellationToken cancellationToken)
         {
-            _container = container;
+            _directory = directory;
             _cancellationToken = cancellationToken;
         }
 
@@ -72,16 +73,27 @@ namespace Enable.IO.Abstractions
                     return false;
                 }
 
-                // TODO How should this handle virtual directories?
-                var response = _container.ListBlobsSegmentedAsync(_continuationToken, _cancellationToken)
+                var response = _directory.ListFilesAndDirectoriesSegmentedAsync(_continuationToken, _cancellationToken)
                     .GetAwaiter()
                     .GetResult();
 
                 _continuationToken = response.ContinuationToken;
 
                 _currentSegment = response.Results
-                    .OfType<CloudBlockBlob>()
-                    .Select(o => new AzureBlob(o))
+                    .Select<IListFileItem, IFile>((item) =>
+                    {
+                        if (item is CloudFile)
+                        {
+                            return new AzureFile(item as CloudFile);
+                        }
+                        else if (item is CloudFileDirectory)
+                        {
+                            return new AzureFileDirectory(item as CloudFileDirectory);
+                        }
+
+                        // This shouldn't happen unless the Azure Storage introduces a new implementation of the `IListFileItem` base type.
+                        throw new InvalidOperationException("Unexpected file type enumerated.");
+                    })
                     .GetEnumerator();
 
                 return _currentSegment.MoveNext();

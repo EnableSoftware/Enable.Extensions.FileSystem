@@ -2,7 +2,8 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Enable.IO.Abstractions.Azure Tests")]
+[assembly: AssemblyTitle("Enable.Extensions.FileSystem.AzureStorage")]
+[assembly: AssemblyDescription("Enable.Extensions.FileSystem.AzureStorage")]
 [assembly: AssemblyCompany("Enable · enable.com")]
 [assembly: AssemblyCopyright("Copyright © 2017")]
 [assembly: ComVisible(false)]
