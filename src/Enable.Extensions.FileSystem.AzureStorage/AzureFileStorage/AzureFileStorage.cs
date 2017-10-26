@@ -14,9 +14,9 @@ namespace Enable.Extensions.FileSystem
     public class AzureFileStorage : IFileSystem
     {
         private readonly CloudFileShare _share;
-        private readonly string _directory;
+        private readonly CloudFileDirectory _directory;
 
-        public AzureFileStorage(string accountName, string accountKey, string shareName, string directory = null)
+        public AzureFileStorage(string accountName, string accountKey, string shareName)
         {
             var credentials = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
@@ -24,10 +24,11 @@ namespace Enable.Extensions.FileSystem
             var client = storageAccount.CreateCloudFileClient();
 
             _share = client.GetShareReference(shareName);
-            _directory = directory;
+
+            _directory = _share.GetRootDirectoryReference();
         }
 
-        public AzureFileStorage(CloudFileClient client, string shareName, string directory = null)
+        public AzureFileStorage(CloudFileClient client, string shareName)
         {
             if (client == null)
             {
@@ -35,7 +36,7 @@ namespace Enable.Extensions.FileSystem
             }
 
             _share = client.GetShareReference(shareName);
-            _directory = directory;
+            _directory = _share.GetRootDirectoryReference();
         }
 
         public async Task CopyFileAsync(
@@ -43,10 +44,8 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
-
-            var sourceFile = directory.GetFileReference(sourcePath);
-            var targetFile = directory.GetFileReference(targetPath);
+            var sourceFile = _directory.GetFileReference(sourcePath);
+            var targetFile = _directory.GetFileReference(targetPath);
 
             // The following only initiates a copy. There does not appear a way
             // to wait until the copy is complete without monitoring the copy
@@ -67,9 +66,7 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
-
-            var file = directory.GetFileReference(path);
+            var file = _directory.GetFileReference(path);
 
             await file.DeleteIfExistsAsync(cancellationToken);
         }
@@ -78,14 +75,12 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var root = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
+            var directory = string.IsNullOrEmpty(path)
+                ? _directory
+                : _directory.GetDirectoryReference(path);
 
             try
             {
-                var directory = string.IsNullOrEmpty(path)
-                    ? root
-                    : root.GetDirectoryReference(path);
-
                 await directory.FetchAttributesAsync(cancellationToken);
 
                 var directoryContents = new AzureFileStorageDirectoryContents(directory);
@@ -107,9 +102,7 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
-
-            var file = directory.GetFileReference(path);
+            var file = _directory.GetFileReference(path);
 
             try
             {
@@ -129,9 +122,7 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
-
-            var file = directory.GetFileReference(path);
+            var file = _directory.GetFileReference(path);
 
             return await file.OpenReadAsync(cancellationToken);
         }
@@ -141,9 +132,7 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
-
-            var sourceFile = directory.GetFileReference(sourcePath);
+            var sourceFile = _directory.GetFileReference(sourcePath);
 
             // It is not currently possible to rename a file in Azure. We
             // therefore attempt a copy and then delete. Note, however, that
@@ -158,9 +147,7 @@ namespace Enable.Extensions.FileSystem
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
-
-            var file = directory.GetFileReference(path);
+            var file = _directory.GetFileReference(path);
 
             await file.UploadFromStreamAsync(stream, cancellationToken);
         }
@@ -178,28 +165,6 @@ namespace Enable.Extensions.FileSystem
         private static bool IsNotFoundStorageException(StorageException ex)
         {
             return ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.NotFound;
-        }
-
-        private async Task<CloudFileDirectory> GetDirectoryAndCreateIfNotExists(
-            string path,
-            CancellationToken cancellationToken)
-        {
-            await _share.CreateIfNotExistsAsync(cancellationToken);
-
-            var rootDirectory = _share.GetRootDirectoryReference();
-
-            if (string.IsNullOrEmpty(path))
-            {
-                // TODO Review this code. Do we want to allow callers to scope requests to a sub-directory?
-                // If so, should we be limiting operations to below this directory only?
-                return rootDirectory;
-            }
-
-            var directory = rootDirectory.GetDirectoryReference(path);
-
-            await directory.CreateIfNotExistsAsync(cancellationToken);
-
-            return directory;
         }
     }
 }
