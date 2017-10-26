@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Enable.Extensions.FileSystem.AzureStorage.Internal;
@@ -15,7 +16,7 @@ namespace Enable.Extensions.FileSystem
         private readonly CloudFileShare _share;
         private readonly string _directory;
 
-        public AzureFileStorage(string accountName, string accountKey, string shareName, string directory)
+        public AzureFileStorage(string accountName, string accountKey, string shareName, string directory = null)
         {
             var credentials = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
@@ -26,7 +27,7 @@ namespace Enable.Extensions.FileSystem
             _directory = directory;
         }
 
-        public AzureFileStorage(CloudFileClient client, string shareName, string directory)
+        public AzureFileStorage(CloudFileClient client, string shareName, string directory = null)
         {
             if (client == null)
             {
@@ -77,13 +78,24 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var directory = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
+            var root = await GetDirectoryAndCreateIfNotExists(_directory, cancellationToken);
 
-            // TODO Do we need to fetch directory attributes?
-            // See `directory.FetchAttributesAsync(cancellationToken)`.
-            var directoryContents = new AzureFileStorageDirectoryContents(directory);
+            try
+            {
+                var directory = string.IsNullOrEmpty(path)
+                    ? root
+                    : root.GetDirectoryReference(path);
 
-            return directoryContents;
+                await directory.FetchAttributesAsync(cancellationToken);
+
+                var directoryContents = new AzureFileStorageDirectoryContents(directory);
+
+                return directoryContents;
+            }
+            catch (StorageException ex) when (IsNotFoundStorageException(ex))
+            {
+                return new NotFoundDirectoryContents(path);
+            }
         }
 
         /// <summary>
@@ -107,9 +119,8 @@ namespace Enable.Extensions.FileSystem
 
                 return fileInfo;
             }
-            catch (StorageException)
+            catch (StorageException ex) when (IsNotFoundStorageException(ex))
             {
-                // TODO Here we should only be catching errors when the file is not found.
                 return new NotFoundFile(path);
             }
         }
@@ -164,6 +175,11 @@ namespace Enable.Extensions.FileSystem
         {
         }
 
+        private static bool IsNotFoundStorageException(StorageException ex)
+        {
+            return ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.NotFound;
+        }
+
         private async Task<CloudFileDirectory> GetDirectoryAndCreateIfNotExists(
             string path,
             CancellationToken cancellationToken)
@@ -171,6 +187,13 @@ namespace Enable.Extensions.FileSystem
             await _share.CreateIfNotExistsAsync(cancellationToken);
 
             var rootDirectory = _share.GetRootDirectoryReference();
+
+            if (string.IsNullOrEmpty(path))
+            {
+                // TODO Review this code. Do we want to allow callers to scope requests to a sub-directory?
+                // If so, should we be limiting operations to below this directory only?
+                return rootDirectory;
+            }
 
             var directory = rootDirectory.GetDirectoryReference(path);
 
