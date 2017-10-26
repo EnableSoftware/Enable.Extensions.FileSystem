@@ -163,7 +163,7 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
-        public async Task GetFGetFileStreamAsync_ReturnsFileStreamIfFileExistsileStreamAsync()
+        public async Task GetFileStreamAsync_ReturnsFileStreamIfFileExists()
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
