@@ -20,20 +20,17 @@ namespace Enable.Extensions.FileSystem.Test
             return rng.Next(byte.MaxValue);
         }
 
-        internal static Task CreateTestFilesAsync(CloudBlobContainer container, int count)
+        internal static Task CreateTestFilesAsync(CloudBlobContainer container, int count, string prefix = null)
         {
+            prefix = prefix ?? string.Empty;
+
             var tasks = Enumerable.Range(0, count)
-                .Select(o => CreateTestFileAsync(container))
+                .Select(o => Path.GetRandomFileName())
+                .Select(o => Path.Combine(prefix, o))
+                .Select(o => CreateTestFileAsync(container, o))
                 .ToArray();
 
             return Task.WhenAll(tasks);
-        }
-
-        internal static Task CreateTestFileAsync(CloudBlobContainer container)
-        {
-            var blobName = Path.GetRandomFileName();
-
-            return CreateTestFileAsync(container, blobName);
         }
 
         internal static Task CreateTestFileAsync(CloudBlobContainer container, string blobName)
