@@ -45,14 +45,14 @@ namespace Enable.Extensions.FileSystem.Test
             var source = Path.GetRandomFileName();
             var target = Path.GetRandomFileName();
 
-            await CreateTestFileAsync(_container, source);
+            await AzureStorageTestHelper.CreateTestFileAsync(_container, source);
 
             // Act
             await _sut.CopyFileAsync(source, target);
 
             // Assert
-            Assert.True(await ExistsAsync(_container, source));
-            Assert.True(await ExistsAsync(_container, target));
+            Assert.True(await AzureStorageTestHelper.ExistsAsync(_container, source));
+            Assert.True(await AzureStorageTestHelper.ExistsAsync(_container, target));
         }
 
         [Fact]
@@ -76,13 +76,13 @@ namespace Enable.Extensions.FileSystem.Test
             // Arrange
             var fileName = Path.GetRandomFileName();
 
-            await CreateTestFileAsync(_container, fileName);
+            await AzureStorageTestHelper.CreateTestFileAsync(_container, fileName);
 
             // Act
             await _sut.DeleteFileAsync(fileName);
 
             // Assert
-            Assert.False(await ExistsAsync(_container, fileName));
+            Assert.False(await AzureStorageTestHelper.ExistsAsync(_container, fileName));
         }
 
         [Fact]
@@ -109,9 +109,9 @@ namespace Enable.Extensions.FileSystem.Test
         public async Task GetDirectoryContentsAsync_ReturnsFileList()
         {
             // Arrange
-            var filesCount = CreateRandomNumber();
+            var filesCount = AzureStorageTestHelper.CreateRandomNumber();
 
-            await CreateTestFilesAsync(_container, filesCount);
+            await AzureStorageTestHelper.CreateTestFilesAsync(_container, filesCount);
 
             // Act
             var result = await _sut.GetDirectoryContentsAsync(string.Empty);
@@ -139,7 +139,7 @@ namespace Enable.Extensions.FileSystem.Test
             // Arrange
             var fileName = Path.GetRandomFileName();
 
-            await CreateTestFileAsync(_container, fileName);
+            await AzureStorageTestHelper.CreateTestFileAsync(_container, fileName);
 
             // Act
             var result = await _sut.GetFileInfoAsync(fileName);
@@ -168,9 +168,9 @@ namespace Enable.Extensions.FileSystem.Test
             // Arrange
             var fileName = Path.GetRandomFileName();
 
-            var expectedContents = CreateRandomString();
+            var expectedContents = AzureStorageTestHelper.CreateRandomString();
 
-            await CreateTestFileAsync(_container, fileName, expectedContents);
+            await AzureStorageTestHelper.CreateTestFileAsync(_container, fileName, expectedContents);
 
             // Act
             using (var stream = await _sut.GetFileStreamAsync(fileName))
@@ -217,14 +217,14 @@ namespace Enable.Extensions.FileSystem.Test
             var source = Path.GetRandomFileName();
             var target = Path.GetRandomFileName();
 
-            await CreateTestFileAsync(_container, source);
+            await AzureStorageTestHelper.CreateTestFileAsync(_container, source);
 
             // Act
             await _sut.RenameFileAsync(source, target);
 
             // Assert
-            Assert.False(await ExistsAsync(_container, source));
-            Assert.True(await ExistsAsync(_container, target));
+            Assert.False(await AzureStorageTestHelper.ExistsAsync(_container, source));
+            Assert.True(await AzureStorageTestHelper.ExistsAsync(_container, target));
         }
 
         [Fact]
@@ -246,7 +246,7 @@ namespace Enable.Extensions.FileSystem.Test
         public async Task SaveFileAsync_Succeeds()
         {
             // Arrange
-            var contents = CreateRandomString();
+            var contents = AzureStorageTestHelper.CreateRandomString();
 
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
             {
@@ -285,54 +285,6 @@ namespace Enable.Extensions.FileSystem.Test
 
                 _disposed = true;
             }
-        }
-
-        private static string CreateRandomString()
-        {
-            return Guid.NewGuid().ToString();
-        }
-
-        private static int CreateRandomNumber()
-        {
-            var rng = new Random();
-            return rng.Next(byte.MaxValue);
-        }
-
-        private static Task CreateTestFilesAsync(CloudBlobContainer container, int count)
-        {
-            var tasks = Enumerable.Range(0, count)
-                .Select(o => CreateTestFileAsync(container))
-                .ToArray();
-
-            return Task.WhenAll(tasks);
-        }
-
-        private static Task CreateTestFileAsync(CloudBlobContainer container)
-        {
-            var blobName = Path.GetRandomFileName();
-
-            return CreateTestFileAsync(container, blobName);
-        }
-
-        private static Task CreateTestFileAsync(CloudBlobContainer container, string blobName)
-        {
-            var contents = CreateRandomString();
-
-            return CreateTestFileAsync(container, blobName, contents);
-        }
-
-        private static Task CreateTestFileAsync(CloudBlobContainer container, string blobName, string contents)
-        {
-            var blob = container.GetBlockBlobReference(blobName);
-
-            return blob.UploadTextAsync(contents, Encoding.UTF8, null, null, null);
-        }
-
-        private static Task<bool> ExistsAsync(CloudBlobContainer container, string blobName)
-        {
-            var blob = container.GetBlockBlobReference(blobName);
-
-            return blob.ExistsAsync();
         }
     }
 }
