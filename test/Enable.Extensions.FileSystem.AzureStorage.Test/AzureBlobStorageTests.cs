@@ -1,8 +1,10 @@
 ﻿using System;
-using System.Configuration;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Xunit;
 
 namespace Enable.Extensions.FileSystem.Test
@@ -11,61 +13,86 @@ namespace Enable.Extensions.FileSystem.Test
     /// Tests for the Azure Blob Storage file storage implementation.
     /// </summary>
     /// <remarks>
-    /// These tests currently require the Azure Storage Emulator to be running.
+    /// These tests require a connection to an Azure Storage account, or
+    /// the Azure Storage Emulator to be running if running a debug build.
     /// </remarks>
-    [CollectionDefinition("Azure Storage Integration Tests")]
-    public class AzureBlobStorageTests : IClassFixture<AzureStorageEmulatorFixture>, IDisposable
+    public class AzureBlobStorageTests : IClassFixture<AzureStorageTestFixture>, IDisposable
     {
-        private readonly AzureStorageEmulatorFixture _fixture;
-
+        private readonly CloudBlobContainer _container;
         private readonly AzureBlobStorage _sut;
 
         private bool _disposed;
 
-        public AzureBlobStorageTests(AzureStorageEmulatorFixture fixture)
+        public AzureBlobStorageTests(AzureStorageTestFixture fixture)
         {
-            _fixture = fixture;
+            var storageAccount = fixture.StorageAccount;
 
-            var connectionString = ConfigurationManager.AppSettings.Get("StorageConnectionString");
+            var storageClient = storageAccount.CreateCloudBlobClient();
 
-            var account = CloudStorageAccount.Parse(connectionString);
-            var client = account.CreateCloudBlobClient();
+            var containerName = Guid.NewGuid().ToString();
 
-            _sut = new AzureBlobStorage(client, "container");
+            _container = storageClient.GetContainerReference(containerName);
+
+            _container.CreateIfNotExists();
+
+            _sut = new AzureBlobStorage(storageClient, containerName);
         }
 
         [Fact]
-        public async Task VerifyAzureStorageEmulatorIsRunning()
+        public async Task CopyFileAsync_SucceedsIfSourceFileExists()
         {
+            // Arrange
+            var source = Path.GetRandomFileName();
+            var target = Path.GetRandomFileName();
+
+            await CreateTestFileAsync(_container, source);
+
             // Act
-            var isRunning = await _fixture.AzureStorageEmulator.GetIsEmulatorRunning();
+            await _sut.CopyFileAsync(source, target);
 
             // Assert
-            Assert.True(isRunning);
+            Assert.True(await ExistsAsync(_container, source));
+            Assert.True(await ExistsAsync(_container, target));
         }
 
         [Fact]
-        public Task CopyFileAsync_SucceedsIfSourceFileExists()
+        public async Task CopyFileAsync_ThrowsIfFileDoesNotExist()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var source = Path.GetRandomFileName();
+            var target = Path.GetRandomFileName();
+
+            // Act
+            var exception = await Record.ExceptionAsync(
+                () => _sut.CopyFileAsync(source, target));
+
+            // Assert
+            Assert.IsAssignableFrom<StorageException>(exception);
         }
 
         [Fact]
-        public Task CopyFileAsync_ThrowsIfFileDoesNotExist()
+        public async Task DeleteFileAsync_SucceedsIfFileExists()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            await CreateTestFileAsync(_container, fileName);
+
+            // Act
+            await _sut.DeleteFileAsync(fileName);
+
+            // Assert
+            Assert.False(await ExistsAsync(_container, fileName));
         }
 
         [Fact]
-        public Task DeleteFileAsync_SucceedsIfSourceFileExists()
+        public async Task DeleteFileAsync_DoesNotThrowIfFileDoesNotExist()
         {
-            throw new NotImplementedException();
-        }
+            // Arrange
+            var fileName = Path.GetRandomFileName();
 
-        [Fact]
-        public Task DeleteFileAsync_DoesNotThrowIfFileDoesNotExist()
-        {
-            throw new NotImplementedException();
+            // Act
+            await _sut.DeleteFileAsync(fileName);
         }
 
         [Fact]
@@ -79,9 +106,18 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
-        public Task GetDirectoryContentsAsync_ReturnsFileList()
+        public async Task GetDirectoryContentsAsync_ReturnsFileList()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var filesCount = CreateRandomNumber();
+
+            await CreateTestFilesAsync(_container, filesCount);
+
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(string.Empty);
+
+            // Assert
+            Assert.Equal(filesCount, result.Count());
         }
 
         [Fact]
@@ -98,9 +134,19 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
-        public Task GetFileInfoAsync_ReturnsFileInfoIfFileExists()
+        public async Task GetFileInfoAsync_ReturnsFileInfoIfFileExists()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            await CreateTestFileAsync(_container, fileName);
+
+            // Act
+            var result = await _sut.GetFileInfoAsync(fileName);
+
+            // Assert
+            Assert.True(result.Exists);
+            Assert.False(result.IsDirectory);
         }
 
         [Fact]
@@ -117,39 +163,98 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
-        public Task GetFileStreamAsync_ReturnsFileStreamIfFileExists()
+        public async Task GetFGetFileStreamAsync_ReturnsFileStreamIfFileExistsileStreamAsync()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            var expectedContents = CreateRandomString();
+
+            await CreateTestFileAsync(_container, fileName, expectedContents);
+
+            // Act
+            using (var stream = await _sut.GetFileStreamAsync(fileName))
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                var contents = reader.ReadToEnd();
+
+                // Assert
+                Assert.Equal(expectedContents, contents);
+            }
         }
 
         [Fact]
-        public Task GetFileStreamAsync_ThrowsIfFileDoesNotExist()
+        public async Task GetFileStreamAsync_ThrowsIfFileDoesNotExist()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            // Act
+            var exception = await Record.ExceptionAsync(() => _sut.GetFileStreamAsync(fileName));
+
+            // Assert
+            Assert.IsAssignableFrom<StorageException>(exception);
         }
 
         [Fact]
-        public Task GetFileStreamAsync_ThrowsIfFileIsNotSpecified()
+        public async Task GetFileStreamAsync_ThrowsIfFileIsNotSpecified()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            // Act
+            var exception = await Record.ExceptionAsync(
+                () => _sut.GetFileStreamAsync(fileName));
+
+            // Assert
+            Assert.IsAssignableFrom<StorageException>(exception);
         }
 
         [Fact]
-        public Task RenameFileAsync_SucceedsIfSourceFileExists()
+        public async Task RenameFileAsync_SucceedsIfSourceFileExists()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var source = Path.GetRandomFileName();
+            var target = Path.GetRandomFileName();
+
+            await CreateTestFileAsync(_container, source);
+
+            // Act
+            await _sut.RenameFileAsync(source, target);
+
+            // Assert
+            Assert.False(await ExistsAsync(_container, source));
+            Assert.True(await ExistsAsync(_container, target));
         }
 
         [Fact]
-        public Task RenameFileAsync_ThrowsIfFileDoesNotExist()
+        public async Task RenameFileAsync_ThrowsIfFileDoesNotExist()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var source = Path.GetRandomFileName();
+            var target = Path.GetRandomFileName();
+
+            // Act
+            var exception = await Record.ExceptionAsync(
+                () => _sut.RenameFileAsync(source, target));
+
+            // Assert
+            Assert.IsAssignableFrom<StorageException>(exception);
         }
 
         [Fact]
-        public Task SaveFileAsync_Succeeds()
+        public async Task SaveFileAsync_Succeeds()
         {
-            throw new NotImplementedException();
+            // Arrange
+            var contents = CreateRandomString();
+
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
+            {
+                var fileName = Path.GetRandomFileName();
+
+                // Act
+                await _sut.SaveFileAsync(fileName, stream);
+            }
         }
 
         public void Dispose()
@@ -167,10 +272,67 @@ namespace Enable.Extensions.FileSystem.Test
 
             if (disposing)
             {
+                try
+                {
+                    // Make a best effort to remove our temporary test container.
+                    _container.DeleteIfExists();
+                }
+                catch
+                {
+                }
+
                 _sut.Dispose();
 
                 _disposed = true;
             }
+        }
+
+        private static string CreateRandomString()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        private static int CreateRandomNumber()
+        {
+            var rng = new Random();
+            return rng.Next(byte.MaxValue);
+        }
+
+        private static Task CreateTestFilesAsync(CloudBlobContainer container, int count)
+        {
+            var tasks = Enumerable.Range(0, count)
+                .Select(o => CreateTestFileAsync(container))
+                .ToArray();
+
+            return Task.WhenAll(tasks);
+        }
+
+        private static Task CreateTestFileAsync(CloudBlobContainer container)
+        {
+            var blobName = Path.GetRandomFileName();
+
+            return CreateTestFileAsync(container, blobName);
+        }
+
+        private static Task CreateTestFileAsync(CloudBlobContainer container, string blobName)
+        {
+            var contents = CreateRandomString();
+
+            return CreateTestFileAsync(container, blobName, contents);
+        }
+
+        private static Task CreateTestFileAsync(CloudBlobContainer container, string blobName, string contents)
+        {
+            var blob = container.GetBlockBlobReference(blobName);
+
+            return blob.UploadTextAsync(contents, Encoding.UTF8, null, null, null);
+        }
+
+        private static Task<bool> ExistsAsync(CloudBlobContainer container, string blobName)
+        {
+            var blob = container.GetBlockBlobReference(blobName);
+
+            return blob.ExistsAsync();
         }
     }
 }

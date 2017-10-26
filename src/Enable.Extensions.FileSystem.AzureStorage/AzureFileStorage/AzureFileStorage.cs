@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Enable.Extensions.FileSystem.AzureStorage.Internal;
@@ -87,7 +86,7 @@ namespace Enable.Extensions.FileSystem
 
                 return directoryContents;
             }
-            catch (StorageException ex) when (IsNotFoundStorageException(ex))
+            catch (StorageException ex) when (StorageExceptionHelper.IsNotFoundStorageException(ex))
             {
                 return new NotFoundDirectoryContents(path);
             }
@@ -112,7 +111,7 @@ namespace Enable.Extensions.FileSystem
 
                 return fileInfo;
             }
-            catch (StorageException ex) when (IsNotFoundStorageException(ex))
+            catch (StorageException ex) when (StorageExceptionHelper.IsNotFoundStorageException(ex))
             {
                 return new NotFoundFile(path);
             }
@@ -160,11 +159,6 @@ namespace Enable.Extensions.FileSystem
 
         protected virtual void Dispose(bool disposing)
         {
-        }
-
-        private static bool IsNotFoundStorageException(StorageException ex)
-        {
-            return ex.RequestInformation.HttpStatusCode == (int)HttpStatusCode.NotFound;
         }
     }
 }

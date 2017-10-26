@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Enable.Extensions.FileSystem.AzureStorage.Internal;
@@ -75,13 +76,36 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync(cancellationToken);
 
-            var directory = _container.GetDirectoryReference(path);
+            // The implementation of this method differs from the File Storage implementation.
+            // With Blob Storage there is no concept of a "directory". Path segements in file names
+            // are considered part of the file name, or a filename "prefix". There is therefore no
+            // equivalent of `CloudFileDirectory.ExistsAsync()` on a `CloudBlobDirectory`. A
+            // "directory" therefore only exists if there is a file whose name contains this
+            // "directory" or "prefix". Here were therefore try a list files with the given prefix
+            // and consider the directory "path" to exist if there is at least one file with this
+            // prefix.
+            var response = await _container.ListBlobsSegmentedAsync(
+                prefix: path,
+                useFlatBlobListing: true,
+                blobListingDetails: BlobListingDetails.None,
+                maxResults: 1,
+                currentToken: null,
+                options: null,
+                operationContext: null,
+                cancellationToken: cancellationToken);
 
-            // TODO Do we need to fetch directory attributes?
-            // See `directory.FetchAttributesAsync(cancellationToken)`.
-            var directoryContents = new AzureBlobStorageDirectoryContents(directory);
+            var directoryExists = response.Results.Any();
 
-            return directoryContents;
+            if (directoryExists)
+            {
+                var directory = _container.GetDirectoryReference(path);
+
+                var directoryContents = new AzureBlobStorageDirectoryContents(directory);
+
+                return directoryContents;
+            }
+
+            return new NotFoundDirectoryContents(path);
         }
 
         public async Task<IFile> GetFileInfoAsync(
@@ -100,9 +124,8 @@ namespace Enable.Extensions.FileSystem
 
                 return blobInfo;
             }
-            catch (StorageException)
+            catch (StorageException ex) when (StorageExceptionHelper.IsNotFoundStorageException(ex))
             {
-                // TODO Here we should only be catching errors when the file is not found.
                 return new NotFoundFile(path);
             }
         }
