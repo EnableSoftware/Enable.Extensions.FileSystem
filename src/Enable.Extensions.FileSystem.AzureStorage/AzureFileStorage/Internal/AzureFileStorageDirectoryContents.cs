@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.WindowsAzure.Storage.File;
@@ -24,9 +23,9 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 
         public bool Exists => true;
 
-        public string Path => throw new NotImplementedException();
+        public string Path => _directory.Uri.LocalPath;
 
-        public string Name => throw new NotImplementedException();
+        public string Name => _directory.Name;
 
         public IEnumerator<IFile> GetEnumerator()
         {
