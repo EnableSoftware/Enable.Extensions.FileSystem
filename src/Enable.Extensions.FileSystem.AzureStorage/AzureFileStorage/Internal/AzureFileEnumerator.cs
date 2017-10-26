@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,6 +55,8 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 
         public bool MoveNext()
         {
+            _cancellationToken.ThrowIfCancellationRequested();
+
             // Here we enumerate over segmented result sets. Each segment of
             // blob results is retrieved asynchronously as the previous
             // segment is exhausted.
@@ -73,7 +75,7 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
                     return false;
                 }
 
-                var response = _directory.ListFilesAndDirectoriesSegmentedAsync(_continuationToken, _cancellationToken)
+                var response = _directory.ListFilesAndDirectoriesSegmentedAsync(_continuationToken)
                     .GetAwaiter()
                     .GetResult();
 

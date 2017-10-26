@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,7 +33,9 @@ namespace Enable.Extensions.FileSystem.Test
 
             _fileShare = storageClient.GetShareReference(fileShareName);
 
-            _fileShare.CreateIfNotExists();
+            _fileShare.CreateIfNotExistsAsync()
+                .GetAwaiter()
+                .GetResult();
 
             _sut = new AzureFileStorage(storageClient, fileShareName);
         }
@@ -275,7 +277,9 @@ namespace Enable.Extensions.FileSystem.Test
                 try
                 {
                     // Make a best effort to remove our temporary test share.
-                    _fileShare.DeleteIfExists();
+                    _fileShare.DeleteIfExistsAsync()
+                        .GetAwaiter()
+                        .GetResult();
                 }
                 catch
                 {

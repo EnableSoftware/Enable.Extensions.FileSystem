@@ -1,50 +1,58 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B11D4C93-7364-42F3-92F0-5A982B3B07DD}"
-	ProjectSection(SolutionItems) = preProject
-		.gitattributes = .gitattributes
-		.gitignore = .gitignore
-		CodeMaid.config = CodeMaid.config
-		CONTRIBUTING.md = CONTRIBUTING.md
-		CustomExtendedCorrectnessRules.ruleset = CustomExtendedCorrectnessRules.ruleset
-		LICENSE = LICENSE
-		README.md = README.md
-	EndProjectSection
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2002
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F0B891B4-0186-4025-877A-C5687309D042}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{403DD635-6CB8-4E7A-83C4-1BFA31A90D45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Enable.Extensions.FileSystem.AzureStorage", "src\Enable.Extensions.FileSystem.AzureStorage\Enable.Extensions.FileSystem.AzureStorage.csproj", "{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{B073ED3C-0E26-423D-B82A-6812DAC8BD40}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7E9D3504-8D06-4F24-AA8F-8237543504A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.Extensions.FileSystem.AzureStorage", "src\Enable.Extensions.FileSystem.AzureStorage\Enable.Extensions.FileSystem.AzureStorage.csproj", "{F0518597-1A17-4E6F-AF58-C1036893F457}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enable.Extensions.FileSystem.AzureStorage.Test", "test\Enable.Extensions.FileSystem.AzureStorage.Test\Enable.Extensions.FileSystem.AzureStorage.Test.csproj", "{D786E74D-0ACD-4F06-83CC-762BBEC938F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Enable.Extensions.FileSystem.AzureStorage.Test", "test\Enable.Extensions.FileSystem.AzureStorage.Test\Enable.Extensions.FileSystem.AzureStorage.Test.csproj", "{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F0518597-1A17-4E6F-AF58-C1036893F457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0518597-1A17-4E6F-AF58-C1036893F457}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0518597-1A17-4E6F-AF58-C1036893F457}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0518597-1A17-4E6F-AF58-C1036893F457}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D786E74D-0ACD-4F06-83CC-762BBEC938F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Debug|x64.Build.0 = Debug|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Debug|x86.Build.0 = Debug|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Release|x64.ActiveCfg = Release|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Release|x64.Build.0 = Release|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Release|x86.ActiveCfg = Release|Any CPU
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93}.Release|x86.Build.0 = Release|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Debug|x64.Build.0 = Debug|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Debug|x86.Build.0 = Debug|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Release|x64.ActiveCfg = Release|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Release|x64.Build.0 = Release|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Release|x86.ActiveCfg = Release|Any CPU
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{F0518597-1A17-4E6F-AF58-C1036893F457} = {403DD635-6CB8-4E7A-83C4-1BFA31A90D45}
-		{D786E74D-0ACD-4F06-83CC-762BBEC938F5} = {B073ED3C-0E26-423D-B82A-6812DAC8BD40}
+		{E3EE2057-CAF5-43A0-9F88-96E0207CDB93} = {F0B891B4-0186-4025-877A-C5687309D042}
+		{FADAD3A7-BBFB-4C42-AE0D-9CC1DE6F1991} = {7E9D3504-8D06-4F24-AA8F-8237543504A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {F188369E-98D9-4D69-A672-E293071B848F}
+		SolutionGuid = {66A27F80-C79B-403F-A5EE-77FD7E78ABE4}
 	EndGlobalSection
 EndGlobal

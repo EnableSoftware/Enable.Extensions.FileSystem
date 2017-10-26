@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,7 +49,7 @@ namespace Enable.Extensions.FileSystem
             // The following only initiates a copy. There does not appear a way
             // to wait until the copy is complete without monitoring the copy
             // status of the target file.
-            await targetFile.StartCopyAsync(sourceFile, cancellationToken);
+            await targetFile.StartCopyAsync(sourceFile);
 
             // However, for a file copy operation within the same storage
             // account, we can assume that the copy operation has completed
@@ -67,7 +67,7 @@ namespace Enable.Extensions.FileSystem
         {
             var file = _directory.GetFileReference(path);
 
-            await file.DeleteIfExistsAsync(cancellationToken);
+            await file.DeleteIfExistsAsync();
         }
 
         public async Task<IDirectoryContents> GetDirectoryContentsAsync(
@@ -80,7 +80,7 @@ namespace Enable.Extensions.FileSystem
 
             try
             {
-                await directory.FetchAttributesAsync(cancellationToken);
+                await directory.FetchAttributesAsync();
 
                 var directoryContents = new AzureFileStorageDirectoryContents(directory);
 
@@ -105,7 +105,7 @@ namespace Enable.Extensions.FileSystem
 
             try
             {
-                await file.FetchAttributesAsync(cancellationToken);
+                await file.FetchAttributesAsync();
 
                 var fileInfo = new AzureFile(file);
 
@@ -123,7 +123,7 @@ namespace Enable.Extensions.FileSystem
         {
             var file = _directory.GetFileReference(path);
 
-            return await file.OpenReadAsync(cancellationToken);
+            return await file.OpenReadAsync();
         }
 
         public async Task RenameFileAsync(
@@ -138,7 +138,7 @@ namespace Enable.Extensions.FileSystem
             // `CopyFileAsync` may throw an exception event if the copy is
             // pending. It is therefore possible to end up with two files.
             await CopyFileAsync(sourcePath, targetPath, cancellationToken);
-            await sourceFile.DeleteIfExistsAsync(cancellationToken);
+            await sourceFile.DeleteIfExistsAsync();
         }
 
         public async Task SaveFileAsync(
@@ -148,7 +148,7 @@ namespace Enable.Extensions.FileSystem
         {
             var file = _directory.GetFileReference(path);
 
-            await file.UploadFromStreamAsync(stream, cancellationToken);
+            await file.UploadFromStreamAsync(stream);
         }
 
         public void Dispose()

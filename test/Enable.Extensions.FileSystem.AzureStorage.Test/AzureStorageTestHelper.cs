@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.File;
@@ -48,7 +47,7 @@ namespace Enable.Extensions.FileSystem.Test
         {
             var blob = container.GetBlockBlobReference(blobName);
 
-            return blob.UploadTextAsync(contents, Encoding.UTF8, null, null, null);
+            return blob.UploadTextAsync(contents);
         }
 
         internal static Task<bool> ExistsAsync(CloudBlobContainer container, string blobName)
@@ -87,7 +86,7 @@ namespace Enable.Extensions.FileSystem.Test
 
             var file = rootDirectory.GetFileReference(fileName);
 
-            return file.UploadTextAsync(contents, Encoding.UTF8, null, null, null);
+            return file.UploadTextAsync(contents);
         }
 
         internal static Task<bool> ExistsAsync(CloudFileShare fileShare, string fileName)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,7 +33,9 @@ namespace Enable.Extensions.FileSystem.Test
 
             _container = storageClient.GetContainerReference(containerName);
 
-            _container.CreateIfNotExists();
+            _container.CreateIfNotExistsAsync()
+                .GetAwaiter()
+                .GetResult();
 
             _sut = new AzureBlobStorage(storageClient, containerName);
         }
@@ -275,7 +277,9 @@ namespace Enable.Extensions.FileSystem.Test
                 try
                 {
                     // Make a best effort to remove our temporary test container.
-                    _container.DeleteIfExists();
+                    _container.DeleteIfExistsAsync()
+                        .GetAwaiter()
+                        .GetResult();
                 }
                 catch
                 {

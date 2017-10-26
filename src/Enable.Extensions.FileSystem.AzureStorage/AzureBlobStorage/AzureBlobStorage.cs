@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -39,7 +39,7 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
+            await _container.CreateIfNotExistsAsync();
 
             var sourceBlob = _container.GetBlockBlobReference(sourcePath);
             var targetBlob = _container.GetBlockBlobReference(targetPath);
@@ -47,7 +47,7 @@ namespace Enable.Extensions.FileSystem
             // The following only initiates a copy. There does not appear a way
             // to wait until the copy is complete without monitoring the copy
             // status of the target file.
-            await targetBlob.StartCopyAsync(sourceBlob, cancellationToken);
+            await targetBlob.StartCopyAsync(sourceBlob);
 
             // However, for a file copy operation within the same storage
             // account, we can assume that the copy operation has completed
@@ -63,18 +63,18 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
+            await _container.CreateIfNotExistsAsync();
 
             var blob = _container.GetBlockBlobReference(path);
 
-            await blob.DeleteIfExistsAsync(cancellationToken);
+            await blob.DeleteIfExistsAsync();
         }
 
         public async Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
+            await _container.CreateIfNotExistsAsync();
 
             // The implementation of this method differs from the File Storage implementation.
             // With Blob Storage there is no concept of a "directory". Path segements in file names
@@ -112,13 +112,13 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
+            await _container.CreateIfNotExistsAsync();
 
             var blob = _container.GetBlockBlobReference(path);
 
             try
             {
-                await blob.FetchAttributesAsync(cancellationToken);
+                await blob.FetchAttributesAsync();
 
                 var blobInfo = new AzureBlob(blob);
 
@@ -134,11 +134,11 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
+            await _container.CreateIfNotExistsAsync();
 
             var blob = _container.GetBlockBlobReference(path);
 
-            return await blob.OpenReadAsync(cancellationToken);
+            return await blob.OpenReadAsync();
         }
 
         public async Task RenameFileAsync(
@@ -146,7 +146,7 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
+            await _container.CreateIfNotExistsAsync();
 
             var sourceBlob = _container.GetBlockBlobReference(sourcePath);
 
@@ -155,7 +155,7 @@ namespace Enable.Extensions.FileSystem
             // `CopyFileAsync` may throw an exception if the copy is still
             // pending. It is therefore possible to end up with two blobs.
             await CopyFileAsync(sourcePath, targetPath, cancellationToken);
-            await sourceBlob.DeleteIfExistsAsync(cancellationToken);
+            await sourceBlob.DeleteIfExistsAsync();
         }
 
         public async Task SaveFileAsync(
@@ -163,11 +163,11 @@ namespace Enable.Extensions.FileSystem
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync(cancellationToken);
+            await _container.CreateIfNotExistsAsync();
 
             var blob = _container.GetBlockBlobReference(path);
 
-            await blob.UploadFromStreamAsync(stream, cancellationToken);
+            await blob.UploadFromStreamAsync(stream);
         }
 
         public void Dispose()
