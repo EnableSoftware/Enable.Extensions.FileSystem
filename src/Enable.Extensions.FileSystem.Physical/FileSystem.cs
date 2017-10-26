@@ -44,9 +44,14 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            File.Copy(
-                GetFullPath(sourcePath),
-                GetFullPath(targetPath));
+            var source = GetFullPath(sourcePath);
+            var target = GetFullPath(targetPath);
+
+            // Ensure that the target directory exists, used if we're moving a
+            // file to a new sub-directory.
+            EnsureParentDirectoryExists(target);
+
+            File.Copy(source, target);
 
             return Task.CompletedTask;
         }
@@ -66,17 +71,17 @@ namespace Enable.Extensions.FileSystem
         {
             var fullPath = GetFullPath(path);
 
-            if (fullPath == null)
-            {
-                return Task.FromResult<IDirectoryContents>(
-                    new NotFoundDirectoryContents(path));
-            }
-
             var directoryInfo = new DirectoryInfo(fullPath);
 
-            var directoryContents = new FileSystemDirectoryContents(directoryInfo);
+            if (directoryInfo.Exists)
+            {
+                var directoryContents = new FileSystemDirectoryContents(directoryInfo);
 
-            return Task.FromResult<IDirectoryContents>(directoryContents);
+                return Task.FromResult<IDirectoryContents>(directoryContents);
+            }
+
+            return Task.FromResult<IDirectoryContents>(
+                    new NotFoundDirectoryContents(path));
         }
 
         /// <summary>
@@ -90,21 +95,23 @@ namespace Enable.Extensions.FileSystem
         {
             var fullPath = GetFullPath(path);
 
-            if (fullPath == null)
-            {
-                return Task.FromResult<IFile>(new NotFoundFile(path));
-            }
-
             var fileInfo = new FileInfo(fullPath);
 
-            return Task.FromResult<IFile>(new FileSystemFile(fileInfo));
+            if (fileInfo.Exists)
+            {
+                return Task.FromResult<IFile>(new FileSystemFile(fileInfo));
+            }
+
+            return Task.FromResult<IFile>(new NotFoundFile(path));
         }
 
         public Task<Stream> GetFileStreamAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var stream = File.OpenRead(GetFullPath(path));
+            var source = GetFullPath(path);
+
+            var stream = File.OpenRead(source);
 
             return Task.FromResult<Stream>(stream);
         }
@@ -114,6 +121,13 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
+            var source = GetFullPath(sourcePath);
+            var target = GetFullPath(targetPath);
+
+            // Ensure that the target directory exists, used if we're moving a
+            // file to a new sub-directory.
+            EnsureParentDirectoryExists(target);
+
             File.Move(
                 GetFullPath(sourcePath),
                 GetFullPath(targetPath));
@@ -126,7 +140,13 @@ namespace Enable.Extensions.FileSystem
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            using (var fileStream = File.Create(GetFullPath(path)))
+            var target = GetFullPath(path);
+
+            // Ensure that the target directory exists, used if we're creating a
+            // file in a new sub-directory.
+            EnsureParentDirectoryExists(target);
+
+            using (var fileStream = File.Create(target))
             {
                 await stream.CopyToAsync(fileStream);
             }
@@ -145,34 +165,37 @@ namespace Enable.Extensions.FileSystem
         /// <summary>
         /// Expand a path relative to the root directory, ensuring that the path does not walk out of the root directory.
         /// </summary>
-        /// <remarks>
-        /// Absolute or otherwise invalid paths return a null value.
-        /// </remarks>
+        /// <exception cref="ArgumentException">
+        /// <see cref="path"/> contains one or more of the invalid characters defined in <see cref="System.IO.Path.GetInvalidPathChars"/>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// <see cref="path"/> is an absolute path.
+        /// </exception>
         private string GetFullPath(string path)
         {
-            try
+            // Absolute paths not permitted. This will throw if
+            // path contains invalid characters.
+            if (Path.IsPathRooted(path))
             {
-                // Absolute paths not permitted. This will throw if
-                // path contains invalid characters.
-                if (Path.IsPathRooted(path))
-                {
-                    return null;
-                }
-
-                var fullPath = PathHelper.GetFullPath(_directory, path);
-
-                // Subpaths must be within sub-directoryies of the root directry.
-                if (!PathHelper.IsUnderneathRoot(_directory, fullPath))
-                {
-                    return null;
-                }
-
-                return fullPath;
+                throw new InvalidOperationException("Absolute paths are not permitted.");
             }
-            catch
+
+            var fullPath = PathHelper.GetFullPath(_directory, path);
+
+            // Sub-paths must be within sub-directoryies of the root directry.
+            if (!PathHelper.IsUnderneathRoot(_directory, fullPath))
             {
-                return null;
+                throw new InvalidOperationException("Paths must be a relative sub-path.");
             }
+
+            return fullPath;
+        }
+
+        private void EnsureParentDirectoryExists(string path)
+        {
+            var parentDirectory = Directory.GetParent(path);
+
+            Directory.CreateDirectory(parentDirectory.FullName);
         }
     }
 }

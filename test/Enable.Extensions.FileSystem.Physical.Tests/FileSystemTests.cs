@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,6 +28,23 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
             // Arrange
             var source = Path.GetRandomFileName();
             var target = Path.GetRandomFileName();
+
+            CreateTestFile(_directory, source);
+
+            // Act
+            await _sut.CopyFileAsync(source, target);
+
+            // Assert
+            Assert.True(await ExistsAsync(source));
+            Assert.True(await ExistsAsync(target));
+        }
+
+        [Fact]
+        public async Task CopyFileAsync_CanMoveAcrossSubDirectories()
+        {
+            // Arrange
+            var source = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+            var target = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
             CreateTestFile(_directory, source);
 
@@ -79,6 +96,21 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
         }
 
         [Fact]
+        public async Task DeleteFileAsync_CanDeleteFromSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            CreateTestFile(_directory, fileName);
+
+            // Act
+            await _sut.DeleteFileAsync(fileName);
+
+            // Assert
+            Assert.False(await ExistsAsync(fileName));
+        }
+
+        [Fact]
         public async Task GetDirectoryContentsAsync_ReturnsEmptyListForEmptyDirectory()
         {
             // Act
@@ -97,6 +129,25 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
 
             // Act
             var result = await _sut.GetDirectoryContentsAsync(string.Empty);
+
+            // Assert
+            Assert.Equal(filesCount, result.Count());
+        }
+
+        [Fact]
+        public async Task GetDirectoryContentsAsync_ReturnsFileListForSubDirectory()
+        {
+            // Arrange
+            var subpath = Path.GetRandomFileName();
+
+            var filesCount = CreateRandomNumber();
+
+            CreateTestFiles(
+                Path.Combine(_directory, subpath),
+                filesCount);
+
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(subpath);
 
             // Assert
             Assert.Equal(filesCount, result.Count());
@@ -138,6 +189,28 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
         }
 
         [Fact]
+        public async Task GetFileInfoAsync_ReturnsFileInfoForFileInSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            CreateTestFile(_directory, fileName);
+
+            var expectedFileInfo = new FileInfo(Path.Combine(_directory, fileName));
+
+            // Act
+            var result = await _sut.GetFileInfoAsync(fileName);
+
+            // Assert
+            Assert.True(result.Exists);
+            Assert.False(result.IsDirectory);
+            Assert.Equal(expectedFileInfo.LastWriteTimeUtc, result.LastModified);
+            Assert.Equal(expectedFileInfo.Length, result.Length);
+            Assert.Equal(expectedFileInfo.Name, result.Name);
+            Assert.Equal(expectedFileInfo.FullName, result.Path);
+        }
+
+        [Fact]
         public async Task GetFileInfoAsync_ReturnsNotFoundFileIfFileDoesNotExist()
         {
             // Arrange
@@ -155,6 +228,27 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
+
+            var expectedContents = CreateRandomString();
+
+            CreateTestFile(_directory, fileName, expectedContents);
+
+            // Act
+            using (var stream = await _sut.GetFileStreamAsync(fileName))
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                var contents = reader.ReadToEnd();
+
+                // Assert
+                Assert.Equal(expectedContents, contents);
+            }
+        }
+
+        [Fact]
+        public async Task GetFileStreamAsync_ReturnsFileStreamForFileInSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
             var expectedContents = CreateRandomString();
 
@@ -215,6 +309,23 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
         }
 
         [Fact]
+        public async Task RenameFileAsync_CanRenameAcrossSubDirectories()
+        {
+            // Arrange
+            var source = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+            var target = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            CreateTestFile(_directory, source);
+
+            // Act
+            await _sut.RenameFileAsync(source, target);
+
+            // Assert
+            Assert.False(await ExistsAsync(source));
+            Assert.True(await ExistsAsync(target));
+        }
+
+        [Fact]
         public async Task RenameFileAsync_ThrowsIfFileDoesNotExist()
         {
             // Arrange
@@ -232,12 +343,27 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
         public async Task SaveFileAsync_Succeeds()
         {
             // Arrange
+            var fileName = Path.GetRandomFileName();
+
             var contents = CreateRandomString();
 
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
             {
-                var fileName = Path.GetRandomFileName();
+                // Act
+                await _sut.SaveFileAsync(fileName, stream);
+            }
+        }
 
+        [Fact]
+        public async Task SaveFileAsync_SucceedsForFileInSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            var contents = CreateRandomString();
+
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
+            {
                 // Act
                 await _sut.SaveFileAsync(fileName, stream);
             }
@@ -321,6 +447,9 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
         private static void CreateTestFile(string directory, string fileName, string contents)
         {
             var path = Path.Combine(directory, fileName);
+
+            var parentDirectory = Directory.GetParent(path);
+            Directory.CreateDirectory(parentDirectory.FullName);
 
             File.WriteAllText(path, contents);
         }
