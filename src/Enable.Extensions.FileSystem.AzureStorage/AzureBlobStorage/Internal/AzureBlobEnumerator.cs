@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,7 +75,6 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
                     return false;
                 }
 
-                // TODO How should this handle virtual directories?
                 var response = _directory.ListBlobsSegmentedAsync(_continuationToken)
                     .GetAwaiter()
                     .GetResult();
@@ -82,8 +82,20 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
                 _continuationToken = response.ContinuationToken;
 
                 _currentSegment = response.Results
-                    .OfType<CloudBlockBlob>()
-                    .Select(o => new AzureBlob(o))
+                    .Select<IListBlobItem, IFile>((item) =>
+                    {
+                        if (item is CloudBlockBlob)
+                        {
+                            return new AzureBlob(item as CloudBlockBlob);
+                        }
+                        else if (item is CloudBlobDirectory)
+                        {
+                            return new AzureBlobDirectory(item as CloudBlobDirectory);
+                        }
+
+                        // This shouldn't happen unless Azure Storage introduces a new implementation of the `IListFileItem` base type.
+                        throw new InvalidOperationException("Unexpected file type enumerated.");
+                    })
                     .GetEnumerator();
 
                 return _currentSegment.MoveNext();
