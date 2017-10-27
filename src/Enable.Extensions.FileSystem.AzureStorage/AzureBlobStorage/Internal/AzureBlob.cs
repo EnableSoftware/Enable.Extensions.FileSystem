@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Enable.Extensions.FileSystem.AzureStorage.Internal
@@ -17,24 +17,21 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
         }
 
         /// <inheritdoc />
-        // TODO Review this property.
         public bool Exists => true;
 
         /// <inheritdoc />
         public bool IsDirectory => false;
 
         /// <inheritdoc />
-        // TODO Review this property.
         public DateTimeOffset LastModified => _blob.Properties.LastModified.GetValueOrDefault();
 
         /// <inheritdoc />
         public long Length => _blob.Properties.Length;
 
         /// <inheritdoc />
-        public string Name => _blob.Name;
+        public string Name => _blob.GetName();
 
         /// <inheritdoc />
-        // TODO Review this property.
-        public string Path => _blob.Uri.PathAndQuery;
+        public string Path => _blob.GetRelativeSubpath();
     }
 }

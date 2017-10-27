@@ -193,6 +193,9 @@ namespace Enable.Extensions.FileSystem.Test
             // Arrange
             var fileName = Path.GetRandomFileName();
 
+            var expectedFileName = Path.GetFileName(fileName);
+            var expectedFilePath = fileName;
+
             await AzureStorageTestHelper.CreateTestFileAsync(_container, fileName);
 
             // Act
@@ -201,6 +204,8 @@ namespace Enable.Extensions.FileSystem.Test
             // Assert
             Assert.True(result.Exists);
             Assert.False(result.IsDirectory);
+            Assert.Equal(expectedFileName, result.Name);
+            Assert.Equal(expectedFilePath, result.Path);
         }
 
         [Fact]
@@ -209,6 +214,9 @@ namespace Enable.Extensions.FileSystem.Test
             // Arrange
             var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
+            var expectedFileName = Path.GetFileName(fileName);
+            var expectedFilePath = fileName;
+
             await AzureStorageTestHelper.CreateTestFileAsync(_container, fileName);
 
             // Act
@@ -217,6 +225,8 @@ namespace Enable.Extensions.FileSystem.Test
             // Assert
             Assert.True(result.Exists);
             Assert.False(result.IsDirectory);
+            Assert.Equal(expectedFileName, result.Name);
+            Assert.Equal(expectedFilePath, result.Path);
         }
 
         [Fact]
@@ -230,6 +240,7 @@ namespace Enable.Extensions.FileSystem.Test
 
             // Assert
             Assert.False(result.Exists);
+            Assert.Equal(fileName, result.Name);
         }
 
         [Fact]

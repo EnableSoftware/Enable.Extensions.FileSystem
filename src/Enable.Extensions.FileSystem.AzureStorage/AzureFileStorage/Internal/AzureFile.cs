@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.WindowsAzure.Storage.File;
 
 namespace Enable.Extensions.FileSystem.AzureStorage.Internal
@@ -20,14 +20,12 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
         }
 
         /// <inheritdoc />
-        // TODO Review this property.
         public bool Exists => true;
 
         /// <inheritdoc />
         public bool IsDirectory => false;
 
         /// <inheritdoc />
-        // TODO Review this property.
         public DateTimeOffset LastModified => _file.Properties.LastModified.GetValueOrDefault();
 
         /// <inheritdoc />
@@ -37,7 +35,6 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
         public string Name => _file.Name;
 
         /// <inheritdoc />
-        // TODO Review this property.
-        public string Path => _file.Uri.PathAndQuery;
+        public string Path => _file.GetRelativeSubpath();
     }
 }
