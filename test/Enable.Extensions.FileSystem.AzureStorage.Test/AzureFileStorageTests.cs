@@ -58,6 +58,23 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
+        public async Task CopyFileAsync_CanMoveAcrossSubDirectories()
+        {
+            // Arrange
+            var source = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+            var target = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            await AzureStorageTestHelper.CreateTestFileAsync(_fileShare, source);
+
+            // Act
+            await _sut.CopyFileAsync(source, target);
+
+            // Assert
+            Assert.True(await AzureStorageTestHelper.ExistsAsync(_fileShare, source));
+            Assert.True(await AzureStorageTestHelper.ExistsAsync(_fileShare, target));
+        }
+
+        [Fact]
         public async Task CopyFileAsync_ThrowsIfFileDoesNotExist()
         {
             // Arrange
@@ -77,6 +94,21 @@ namespace Enable.Extensions.FileSystem.Test
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
+
+            await AzureStorageTestHelper.CreateTestFileAsync(_fileShare, fileName);
+
+            // Act
+            await _sut.DeleteFileAsync(fileName);
+
+            // Assert
+            Assert.False(await AzureStorageTestHelper.ExistsAsync(_fileShare, fileName));
+        }
+
+        [Fact]
+        public async Task DeleteFileAsync_CanDeleteFromSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
             await AzureStorageTestHelper.CreateTestFileAsync(_fileShare, fileName);
 
@@ -123,6 +155,26 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
+        public async Task GetDirectoryContentsAsync_ReturnsFileListForSubDirectory()
+        {
+            // Arrange
+            var subpath = Path.GetRandomFileName();
+
+            var filesCount = AzureStorageTestHelper.CreateRandomNumber();
+
+            await AzureStorageTestHelper.CreateTestFilesAsync(
+                _fileShare,
+                filesCount,
+                subpath);
+
+            // Act
+            var result = await _sut.GetDirectoryContentsAsync(subpath);
+
+            // Assert
+            Assert.Equal(filesCount, result.Count());
+        }
+
+        [Fact]
         public async Task GetDirectoryContentsAsync_ReturnsNotFoundDirectoryIfDirectoryDoesNotExist()
         {
             // Arrange
@@ -152,6 +204,22 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
+        public async Task GetFileInfoAsync_ReturnsFileInfoForFileInSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            await AzureStorageTestHelper.CreateTestFileAsync(_fileShare, fileName);
+
+            // Act
+            var result = await _sut.GetFileInfoAsync(fileName);
+
+            // Assert
+            Assert.True(result.Exists);
+            Assert.False(result.IsDirectory);
+        }
+
+        [Fact]
         public async Task GetFileInfoAsync_ReturnsNotFoundFileIfFileDoesNotExist()
         {
             // Arrange
@@ -169,6 +237,27 @@ namespace Enable.Extensions.FileSystem.Test
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
+
+            var expectedContents = AzureStorageTestHelper.CreateRandomString();
+
+            await AzureStorageTestHelper.CreateTestFileAsync(_fileShare, fileName, expectedContents);
+
+            // Act
+            using (var stream = await _sut.GetFileStreamAsync(fileName))
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                var contents = reader.ReadToEnd();
+
+                // Assert
+                Assert.Equal(expectedContents, contents);
+            }
+        }
+
+        [Fact]
+        public async Task GetFileStreamAsync_ReturnsFileStreamForFileInSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
             var expectedContents = AzureStorageTestHelper.CreateRandomString();
 
@@ -230,6 +319,23 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
+        public async Task RenameFileAsync_CanRenameAcrossSubDirectories()
+        {
+            // Arrange
+            var source = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+            var target = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            await AzureStorageTestHelper.CreateTestFileAsync(_fileShare, source);
+
+            // Act
+            await _sut.RenameFileAsync(source, target);
+
+            // Assert
+            Assert.False(await AzureStorageTestHelper.ExistsAsync(_fileShare, source));
+            Assert.True(await AzureStorageTestHelper.ExistsAsync(_fileShare, target));
+        }
+
+        [Fact]
         public async Task RenameFileAsync_ThrowsIfFileDoesNotExist()
         {
             // Arrange
@@ -248,12 +354,27 @@ namespace Enable.Extensions.FileSystem.Test
         public async Task SaveFileAsync_Succeeds()
         {
             // Arrange
+            var fileName = Path.GetRandomFileName();
+
             var contents = AzureStorageTestHelper.CreateRandomString();
 
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
             {
-                var fileName = Path.GetRandomFileName();
+                // Act
+                await _sut.SaveFileAsync(fileName, stream);
+            }
+        }
 
+        [Fact]
+        public async Task SaveFileAsync_SucceedsForFileInSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+
+            var contents = AzureStorageTestHelper.CreateRandomString();
+
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
+            {
                 // Act
                 await _sut.SaveFileAsync(fileName, stream);
             }
