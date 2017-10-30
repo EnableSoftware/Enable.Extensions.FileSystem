@@ -3,6 +3,10 @@ configuration: Release
 
 image: Visual Studio 2017
 
+environment:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
 clone_depth: 1  
 
 dotnet_csproj:
