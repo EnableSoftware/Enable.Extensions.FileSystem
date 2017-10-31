@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" PrivateAssets="All" Version="1.0.2" />
-    <PackageReference Include="Enable.Extensions.FileSystem.Abstractions" Version="0.1.0" />
   </ItemGroup>
 
   <ItemGroup>
