@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Authors>Enable · enable</Authors>
+    <Authors>Enable · enable.com</Authors>
     <Copyright>Copyright 2017</Copyright>
     <Description>File system abstractions for building testable applications.</Description>
     <PackageIconUrl>https://github.com/EnableSoftware.png</PackageIconUrl>
