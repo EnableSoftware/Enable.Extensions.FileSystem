@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <CodeAnalysisRuleSet>..\..\CustomExtendedCorrectnessRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
@@ -13,10 +13,12 @@
     <PackageLicenseUrl>https://raw.githubusercontent.com/EnableSoftware/Enable.Extensions.FileSystem/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/EnableSoftware/Enable.Extensions.FileSystem</PackageProjectUrl>
     <Version>0.1.0</Version>
+    <AssemblyName>Enable.Extensions.FileSystem.Physical</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" PrivateAssets="All" Version="1.0.2" />
+    <PackageReference Include="System.IO" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
