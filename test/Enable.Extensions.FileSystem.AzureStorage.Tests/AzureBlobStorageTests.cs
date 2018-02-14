@@ -105,6 +105,60 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
+        public async Task DeleteDirectoryAsync_CanDeleteFromSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+            var directoryName = Path.GetRandomFileName();
+
+            await AzureStorageTestHelper.CreateTestFileAsync(_container, Path.Combine(directoryName, fileName));
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            Assert.False(await AzureStorageTestHelper.ExistsAsync(_container, Path.Combine(directoryName, fileName)));
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_DoesNotThrowIfDirectoryDoesNotExist()
+        {
+            // Arrange
+            var directoryName = Path.GetRandomFileName();
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExists()
+        {
+            // Arrange
+            var fileNames = Enumerable.Range(0, AzureStorageTestHelper.CreateRandomNumber())
+                .Select(o => Path.GetRandomFileName())
+                .ToArray();
+
+            var directoryName = Path.GetRandomFileName();
+
+            await AzureStorageTestHelper.CreateTestFilesAsync(_container, fileNames, directoryName);
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            var filesRemaining = 0;
+            foreach (var fileName in fileNames)
+            {
+                if (await AzureStorageTestHelper.ExistsAsync(_container, Path.Combine(directoryName, fileName)))
+                {
+                    filesRemaining++;
+                }
+            }
+
+            Assert.Equal(0, filesRemaining);
+        }
+
+        [Fact]
         public async Task DeleteFileAsync_CanDeleteFromSubDirectory()
         {
             // Arrange

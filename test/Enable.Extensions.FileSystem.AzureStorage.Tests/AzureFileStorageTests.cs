@@ -90,6 +90,62 @@ namespace Enable.Extensions.FileSystem.Test
         }
 
         [Fact]
+        public async Task DeleteDirectoryAsync_CanDeleteFromSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+            var directoryName = Path.GetRandomFileName();
+
+            await AzureStorageTestHelper.CreateTestFileAsync(_fileShare, Path.Combine(directoryName, fileName));
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            Assert.False(await AzureStorageTestHelper.DirectoryExistsAsync(_fileShare, directoryName));
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_DoesNotThrowIfDirectoryDoesNotExist()
+        {
+            // Arrange
+            var directoryName = AzureStorageTestHelper.CreateRandomString();
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExists()
+        {
+            // Arrange
+            var directoryName = AzureStorageTestHelper.CreateRandomString();
+
+            await AzureStorageTestHelper.CreateTestDirectoryAsync(_fileShare, directoryName);
+            await AzureStorageTestHelper.CreateTestFilesAsync(_fileShare, AzureStorageTestHelper.CreateRandomNumber(), directoryName);
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            Assert.False(await AzureStorageTestHelper.DirectoryExistsAsync(_fileShare, directoryName));
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExistsAndEmpty()
+        {
+            // Arrange
+            var directoryName = AzureStorageTestHelper.CreateRandomString();
+            await AzureStorageTestHelper.CreateTestDirectoryAsync(_fileShare, directoryName);
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            Assert.False(await AzureStorageTestHelper.DirectoryExistsAsync(_fileShare, directoryName));
+        }
+
+        [Fact]
         public async Task DeleteFileAsync_SucceedsIfFileExists()
         {
             // Arrange

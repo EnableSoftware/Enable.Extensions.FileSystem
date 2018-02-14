@@ -71,6 +71,64 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
         }
 
         [Fact]
+        public async Task DeleteDirectoryAsync_CanDeleteFromSubDirectory()
+        {
+            // Arrange
+            var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
+            var directoryName = CreateRandomString();
+
+            CreateTestDirectory(_directory, directoryName);
+            CreateTestFile(Path.Combine(_directory, directoryName), fileName);
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            Assert.False(await DirectoryExistsAsync(directoryName));
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_DoesNotThrowIfDirectoryDoesNotExist()
+        {
+            // Arrange
+            var directoryName = CreateRandomString();
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExists()
+        {
+            // Arrange
+            var directoryName = CreateRandomString();
+
+            CreateTestDirectory(_directory, directoryName);
+            CreateTestFiles(Path.Combine(_directory, directoryName), CreateRandomNumber());
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            Assert.False(await DirectoryExistsAsync(directoryName));
+        }
+
+        [Fact]
+        public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExistsAndEmpty()
+        {
+            // Arrange
+            var directoryName = CreateRandomString();
+
+            CreateTestDirectory(_directory, directoryName);
+
+            // Act
+            await _sut.DeleteDirectoryAsync(directoryName);
+
+            // Assert
+            Assert.False(await DirectoryExistsAsync(directoryName));
+        }
+
+        [Fact]
         public async Task DeleteFileAsync_SucceedsIfFileExists()
         {
             // Arrange
@@ -422,6 +480,13 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
             return rng.Next(byte.MaxValue);
         }
 
+        private static void CreateTestDirectory(string rootDirectory, string directory)
+        {
+            var fullPath = Path.GetFullPath(Path.Combine(rootDirectory, directory));
+
+            Directory.CreateDirectory(fullPath);
+        }
+
         private static void CreateTestFiles(string directory, int count)
         {
             for (int i = 0; i < count; i++)
@@ -452,6 +517,13 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
             Directory.CreateDirectory(parentDirectory.FullName);
 
             File.WriteAllText(path, contents);
+        }
+
+        private async Task<bool> DirectoryExistsAsync(string path)
+        {
+            var directoryContents = await _sut.GetDirectoryContentsAsync(path);
+
+            return directoryContents.Exists;
         }
 
         private async Task<bool> ExistsAsync(string path)

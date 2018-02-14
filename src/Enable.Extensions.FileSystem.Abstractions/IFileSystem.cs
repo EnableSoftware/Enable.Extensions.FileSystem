@@ -13,6 +13,10 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken));
 
+        Task DeleteDirectoryAsync(
+            string path,
+            CancellationToken cancellationToken = default(CancellationToken));
+
         Task DeleteFileAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));

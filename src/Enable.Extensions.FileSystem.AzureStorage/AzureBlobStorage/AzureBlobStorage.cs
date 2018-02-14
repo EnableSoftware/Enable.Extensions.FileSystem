@@ -59,6 +59,28 @@ namespace Enable.Extensions.FileSystem
             }
         }
 
+        public async Task DeleteDirectoryAsync(
+            string path,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var directory = await GetDirectoryContentsAsync(path);
+
+            if (directory.Exists)
+            {
+                foreach (var item in directory)
+                {
+                    if (item.IsDirectory)
+                    {
+                        await DeleteDirectoryAsync(item.Path);
+                    }
+                    else
+                    {
+                        await DeleteFileAsync(item.Path);
+                    }
+                }
+            }
+        }
+
         public async Task DeleteFileAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))

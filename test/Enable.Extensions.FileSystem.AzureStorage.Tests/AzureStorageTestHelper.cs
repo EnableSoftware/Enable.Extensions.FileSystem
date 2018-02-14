@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +27,19 @@ namespace Enable.Extensions.FileSystem.Test
 
             var tasks = Enumerable.Range(0, count)
                 .Select(o => Path.GetRandomFileName())
+                .Select(o => Path.Combine(prefix, o))
+                .Select(o => CreateTestFileAsync(container, o))
+                .ToArray();
+
+            return Task.WhenAll(tasks);
+        }
+
+        internal static Task CreateTestFilesAsync(CloudBlobContainer container, IEnumerable<string> names, string prefix = null)
+        {
+            prefix = prefix ?? string.Empty;
+
+            var tasks = Enumerable.Range(0, names.Count())
+                .Select(o => names.ElementAt(o))
                 .Select(o => Path.Combine(prefix, o))
                 .Select(o => CreateTestFileAsync(container, o))
                 .ToArray();
@@ -108,6 +122,37 @@ namespace Enable.Extensions.FileSystem.Test
             var file = parentDirectory.GetFileReference(fileName);
 
             await file.UploadTextAsync(contents);
+        }
+
+        internal static async Task CreateTestDirectoryAsync(CloudFileShare fileShare, string directoryPath)
+        {
+            var pathSegments = directoryPath.Split(
+                new[]
+                {
+                    Path.DirectorySeparatorChar,
+                    Path.AltDirectorySeparatorChar
+                },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            var parentDirectory = fileShare.GetRootDirectoryReference();
+
+            foreach (var segment in pathSegments)
+            {
+                parentDirectory = parentDirectory.GetDirectoryReference(segment);
+
+                // Each parent directory needs to be created before we can create a file.
+                // This is different to the Blob Storage implementation.
+                await parentDirectory.CreateIfNotExistsAsync();
+            }
+        }
+
+        internal static Task<bool> DirectoryExistsAsync(CloudFileShare fileShare, string path)
+        {
+            var rootDirectory = fileShare.GetRootDirectoryReference();
+
+            var directory = rootDirectory.GetDirectoryReference(path);
+
+            return directory.ExistsAsync();
         }
 
         internal static Task<bool> ExistsAsync(CloudFileShare fileShare, string path)

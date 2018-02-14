@@ -56,6 +56,20 @@ namespace Enable.Extensions.FileSystem
             return Task.CompletedTask;
         }
 
+        public Task DeleteDirectoryAsync(
+           string path,
+           CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var directoryInfo = new DirectoryInfo(GetFullPath(path));
+
+            if (directoryInfo.Exists)
+            {
+                Directory.Delete(GetFullPath(path), recursive: true);
+            }
+
+            return Task.CompletedTask;
+        }
+
         public Task DeleteFileAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
