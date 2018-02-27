@@ -81,10 +81,10 @@ namespace Enable.Extensions.FileSystem
                         await DeleteFileAsync(item.Path);
                     }
                 }
-            }
 
-            var directory = _share.GetDirectoryReference(path);
-            await directory.DeleteIfExistsAsync();
+                var directory = _share.GetDirectoryReference(path);
+                await directory.DeleteIfExistsAsync();
+            }
         }
 
         public override async Task DeleteFileAsync(
