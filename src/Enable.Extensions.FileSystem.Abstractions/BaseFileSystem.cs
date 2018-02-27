@@ -1,55 +1,67 @@
 using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Enable.Extensions.FileSystem
 {
-    public interface IFileSystem : IDisposable
+    public abstract class BaseFileSystem : IFileSystem
     {
-        Task CopyFileAsync(
+        public abstract Task CopyFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task DeleteDirectoryAsync(
+        public abstract Task DeleteDirectoryAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task DeleteFileAsync(
+        public abstract Task DeleteFileAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        /// <summary>
-        /// Enumerate a directory at the given path, if any.
-        /// </summary>
-        /// <param name="path">Relative path that identifies the directory.</param>
-        /// <returns>Returns the contents of the directory.</returns>
-        Task<IDirectoryContents> GetDirectoryContentsAsync(
+        public abstract Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task<IFile> GetFileInfoAsync(
+        public abstract Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task<Stream> GetFileStreamAsync(
+        public abstract Task<Stream> GetFileStreamAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task RenameFileAsync(
+        public abstract Task RenameFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task SaveFileAsync(
+        public abstract Task SaveFileAsync(
             string path,
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken));
 
-        Task SaveFileAsync(
+        public async Task SaveFileAsync(
             string path,
             string contents,
-            CancellationToken cancellationToken = default(CancellationToken));
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents ?? string.Empty)))
+            {
+                await SaveFileAsync(path, stream, cancellationToken);
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+        }
     }
 }

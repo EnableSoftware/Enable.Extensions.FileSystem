@@ -10,7 +10,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Enable.Extensions.FileSystem
 {
-    public class AzureBlobStorage : IFileSystem
+    public class AzureBlobStorage : BaseFileSystem
     {
         private readonly CloudBlobContainer _container;
 
@@ -34,7 +34,7 @@ namespace Enable.Extensions.FileSystem
             _container = client.GetContainerReference(containerName);
         }
 
-        public async Task CopyFileAsync(
+        public override async Task CopyFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -59,7 +59,7 @@ namespace Enable.Extensions.FileSystem
             }
         }
 
-        public async Task DeleteDirectoryAsync(
+        public override async Task DeleteDirectoryAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -81,7 +81,7 @@ namespace Enable.Extensions.FileSystem
             }
         }
 
-        public async Task DeleteFileAsync(
+        public override async Task DeleteFileAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -92,7 +92,7 @@ namespace Enable.Extensions.FileSystem
             await blob.DeleteIfExistsAsync();
         }
 
-        public async Task<IDirectoryContents> GetDirectoryContentsAsync(
+        public override async Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -130,7 +130,7 @@ namespace Enable.Extensions.FileSystem
             return new NotFoundDirectoryContents(path);
         }
 
-        public async Task<IFile> GetFileInfoAsync(
+        public override async Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -152,7 +152,7 @@ namespace Enable.Extensions.FileSystem
             }
         }
 
-        public async Task<Stream> GetFileStreamAsync(
+        public override async Task<Stream> GetFileStreamAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -163,7 +163,7 @@ namespace Enable.Extensions.FileSystem
             return await blob.OpenReadAsync();
         }
 
-        public async Task RenameFileAsync(
+        public override async Task RenameFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -180,7 +180,7 @@ namespace Enable.Extensions.FileSystem
             await sourceBlob.DeleteIfExistsAsync();
         }
 
-        public async Task SaveFileAsync(
+        public override async Task SaveFileAsync(
             string path,
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -190,16 +190,6 @@ namespace Enable.Extensions.FileSystem
             var blob = _container.GetBlockBlobReference(path);
 
             await blob.UploadFromStreamAsync(stream);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
         }
     }
 }

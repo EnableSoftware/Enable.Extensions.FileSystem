@@ -427,6 +427,26 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
             }
         }
 
+        [Fact]
+        public async Task SaveFileAsync_SavesCorrectContent()
+        {
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            var expectedContents = CreateRandomString();
+
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(expectedContents)))
+            {
+                // Act
+                await _sut.SaveFileAsync(fileName, stream);
+            }
+
+            // Assert
+            var actualContents = await ReadFileContents(fileName);
+
+            Assert.Equal(expectedContents, actualContents);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -531,6 +551,19 @@ namespace Enable.Extensions.FileSystem.Physical.Tests
             var fileInfo = await _sut.GetFileInfoAsync(path);
 
             return fileInfo.Exists;
+        }
+
+        private async Task<string> ReadFileContents(string path)
+        {
+            string contents;
+
+            using (var stream = await _sut.GetFileStreamAsync(path))
+            using (var reader = new StreamReader(stream))
+            {
+                contents = reader.ReadToEnd();
+            }
+
+            return contents;
         }
     }
 }

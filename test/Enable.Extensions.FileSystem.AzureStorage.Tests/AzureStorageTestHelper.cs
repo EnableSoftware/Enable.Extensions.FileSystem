@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.File;
@@ -66,6 +67,21 @@ namespace Enable.Extensions.FileSystem.Test
             var blob = container.GetBlockBlobReference(path);
 
             return blob.ExistsAsync();
+        }
+
+        internal static async Task<string> ReadFileContents(CloudBlobContainer container, string path)
+        {
+            var blob = container.GetBlockBlobReference(path);
+
+            string content;
+            using (var stream = new MemoryStream())
+            {
+                await blob.DownloadToStreamAsync(stream);
+
+                content = Encoding.UTF8.GetString(stream.ToArray());
+            }
+
+            return content;
         }
 
         internal static Task CreateTestFilesAsync(CloudFileShare fileShare, int count, string directory = null)
@@ -162,6 +178,23 @@ namespace Enable.Extensions.FileSystem.Test
             var file = rootDirectory.GetFileReference(path);
 
             return file.ExistsAsync();
+        }
+
+        internal static async Task<string> ReadFileContents(CloudFileShare fileShare, string path)
+        {
+            var rootDirectory = fileShare.GetRootDirectoryReference();
+
+            var file = rootDirectory.GetFileReference(path);
+
+            string content;
+            using (var stream = new MemoryStream())
+            {
+                await file.DownloadToStreamAsync(stream);
+
+                content = Encoding.UTF8.GetString(stream.ToArray());
+            }
+
+            return content;
         }
     }
 }

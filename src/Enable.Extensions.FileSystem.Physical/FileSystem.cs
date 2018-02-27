@@ -9,7 +9,7 @@ namespace Enable.Extensions.FileSystem
     /// <summary>
     /// Represents a physical, on-disk file system.
     /// </summary>
-    public class FileSystem : IFileSystem
+    public class FileSystem : BaseFileSystem
     {
         private readonly string _directory;
 
@@ -39,7 +39,7 @@ namespace Enable.Extensions.FileSystem
             _directory = root;
         }
 
-        public Task CopyFileAsync(
+        public override Task CopyFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -56,7 +56,7 @@ namespace Enable.Extensions.FileSystem
             return Task.CompletedTask;
         }
 
-        public Task DeleteDirectoryAsync(
+        public override Task DeleteDirectoryAsync(
            string path,
            CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -70,7 +70,7 @@ namespace Enable.Extensions.FileSystem
             return Task.CompletedTask;
         }
 
-        public Task DeleteFileAsync(
+        public override Task DeleteFileAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -79,7 +79,7 @@ namespace Enable.Extensions.FileSystem
             return Task.CompletedTask;
         }
 
-        public Task<IDirectoryContents> GetDirectoryContentsAsync(
+        public override Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -103,7 +103,7 @@ namespace Enable.Extensions.FileSystem
         /// </summary>
         /// <param name="path">A path under the root directory.</param>
         /// <returns>The file information. Callers must check <see cref="IFile.Exists"/>.
-        public Task<IFile> GetFileInfoAsync(
+        public override Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -119,7 +119,7 @@ namespace Enable.Extensions.FileSystem
             return Task.FromResult<IFile>(new NotFoundFile(path));
         }
 
-        public Task<Stream> GetFileStreamAsync(
+        public override Task<Stream> GetFileStreamAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -130,7 +130,7 @@ namespace Enable.Extensions.FileSystem
             return Task.FromResult<Stream>(stream);
         }
 
-        public Task RenameFileAsync(
+        public override Task RenameFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -149,7 +149,7 @@ namespace Enable.Extensions.FileSystem
             return Task.CompletedTask;
         }
 
-        public async Task SaveFileAsync(
+        public override async Task SaveFileAsync(
             string path,
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -164,16 +164,6 @@ namespace Enable.Extensions.FileSystem
             {
                 await stream.CopyToAsync(fileStream);
             }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
         }
 
         /// <summary>

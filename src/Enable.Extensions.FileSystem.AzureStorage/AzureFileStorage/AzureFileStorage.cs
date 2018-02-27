@@ -11,7 +11,7 @@ using Microsoft.WindowsAzure.Storage.File;
 
 namespace Enable.Extensions.FileSystem
 {
-    public class AzureFileStorage : IFileSystem
+    public class AzureFileStorage : BaseFileSystem
     {
         private readonly CloudFileShare _share;
 
@@ -35,7 +35,7 @@ namespace Enable.Extensions.FileSystem
             _share = client.GetShareReference(shareName);
         }
 
-        public async Task CopyFileAsync(
+        public override async Task CopyFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -62,7 +62,7 @@ namespace Enable.Extensions.FileSystem
             }
         }
 
-        public async Task DeleteDirectoryAsync(
+        public override async Task DeleteDirectoryAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -87,7 +87,7 @@ namespace Enable.Extensions.FileSystem
             await directory.DeleteIfExistsAsync();
         }
 
-        public async Task DeleteFileAsync(
+        public override async Task DeleteFileAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -96,7 +96,7 @@ namespace Enable.Extensions.FileSystem
             await file.DeleteIfExistsAsync();
         }
 
-        public async Task<IDirectoryContents> GetDirectoryContentsAsync(
+        public override async Task<IDirectoryContents> GetDirectoryContentsAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -121,7 +121,7 @@ namespace Enable.Extensions.FileSystem
         /// </summary>
         /// <param name="path">A path under the root file share.</param>
         /// <returns>The file information. Callers must check <see cref="IFile.Exists"/>.
-        public async Task<IFile> GetFileInfoAsync(
+        public override async Task<IFile> GetFileInfoAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -141,7 +141,7 @@ namespace Enable.Extensions.FileSystem
             }
         }
 
-        public async Task<Stream> GetFileStreamAsync(
+        public override async Task<Stream> GetFileStreamAsync(
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -150,7 +150,7 @@ namespace Enable.Extensions.FileSystem
             return await file.OpenReadAsync();
         }
 
-        public async Task RenameFileAsync(
+        public override async Task RenameFileAsync(
             string sourcePath,
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -170,7 +170,7 @@ namespace Enable.Extensions.FileSystem
             await sourceFile.DeleteIfExistsAsync();
         }
 
-        public async Task SaveFileAsync(
+        public override async Task SaveFileAsync(
             string path,
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
@@ -182,16 +182,6 @@ namespace Enable.Extensions.FileSystem
             await EnsureParentDirectoriesExistAsync(file, cancellationToken);
 
             await file.UploadFromStreamAsync(stream);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
         }
 
         /// <summary>

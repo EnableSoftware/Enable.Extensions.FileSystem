@@ -447,6 +447,26 @@ namespace Enable.Extensions.FileSystem.Test
             }
         }
 
+        [Fact]
+        public async Task SaveFileAsync_SavesCorrectContent()
+        {
+            // Arrange
+            var fileName = Path.GetRandomFileName();
+
+            var expectedContents = AzureStorageTestHelper.CreateRandomString();
+
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(expectedContents)))
+            {
+                // Act
+                await _sut.SaveFileAsync(fileName, stream);
+            }
+
+            // Assert
+            var actualContents = await AzureStorageTestHelper.ReadFileContents(_fileShare, fileName);
+
+            Assert.Equal(expectedContents, actualContents);
+        }
+
         public void Dispose()
         {
             Dispose(true);
