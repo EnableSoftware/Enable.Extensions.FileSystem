@@ -134,28 +134,19 @@ namespace Enable.Extensions.FileSystem.Test
         public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExists()
         {
             // Arrange
-            var fileNames = Enumerable.Range(0, AzureStorageTestHelper.CreateRandomNumber())
-                .Select(o => Path.GetRandomFileName())
-                .ToArray();
-
             var directoryName = Path.GetRandomFileName();
 
-            await AzureStorageTestHelper.CreateTestFilesAsync(_container, fileNames, directoryName);
+            var numberOfFilesToCreate = AzureStorageTestHelper.CreateRandomNumber(
+                minValue: 1, // Ensure that we always create at least one test file.
+                maxValue: byte.MaxValue);
+
+            await AzureStorageTestHelper.CreateTestFilesAsync(_container, numberOfFilesToCreate, directoryName);
 
             // Act
             await _sut.DeleteDirectoryAsync(directoryName);
 
             // Assert
-            var filesRemaining = 0;
-            foreach (var fileName in fileNames)
-            {
-                if (await AzureStorageTestHelper.ExistsAsync(_container, Path.Combine(directoryName, fileName)))
-                {
-                    filesRemaining++;
-                }
-            }
-
-            Assert.Equal(0, filesRemaining);
+            Assert.False(await AzureStorageTestHelper.ExistsAsync(_container, directoryName));
         }
 
         [Fact]

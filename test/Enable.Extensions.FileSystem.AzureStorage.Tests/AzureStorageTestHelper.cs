@@ -18,8 +18,18 @@ namespace Enable.Extensions.FileSystem.Test
 
         internal static int CreateRandomNumber()
         {
+            return CreateRandomNumber(byte.MaxValue);
+        }
+
+        internal static int CreateRandomNumber(int maxValue)
+        {
+            return CreateRandomNumber(0, maxValue);
+        }
+
+        internal static int CreateRandomNumber(int minValue, int maxValue)
+        {
             var rng = new Random();
-            return rng.Next(byte.MaxValue);
+            return rng.Next(minValue, maxValue);
         }
 
         internal static Task CreateTestFilesAsync(CloudBlobContainer container, int count, string prefix = null)
@@ -28,19 +38,6 @@ namespace Enable.Extensions.FileSystem.Test
 
             var tasks = Enumerable.Range(0, count)
                 .Select(o => Path.GetRandomFileName())
-                .Select(o => Path.Combine(prefix, o))
-                .Select(o => CreateTestFileAsync(container, o))
-                .ToArray();
-
-            return Task.WhenAll(tasks);
-        }
-
-        internal static Task CreateTestFilesAsync(CloudBlobContainer container, IEnumerable<string> names, string prefix = null)
-        {
-            prefix = prefix ?? string.Empty;
-
-            var tasks = Enumerable.Range(0, names.Count())
-                .Select(o => names.ElementAt(o))
                 .Select(o => Path.Combine(prefix, o))
                 .Select(o => CreateTestFileAsync(container, o))
                 .ToArray();

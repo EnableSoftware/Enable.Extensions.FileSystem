@@ -121,8 +121,12 @@ namespace Enable.Extensions.FileSystem.Test
             // Arrange
             var directoryName = AzureStorageTestHelper.CreateRandomString();
 
+            var numberOfFilesToCreate = AzureStorageTestHelper.CreateRandomNumber(
+                minValue: 1, // Ensure that we always create at least one test file.
+                maxValue: byte.MaxValue);
+
             await AzureStorageTestHelper.CreateTestDirectoryAsync(_fileShare, directoryName);
-            await AzureStorageTestHelper.CreateTestFilesAsync(_fileShare, AzureStorageTestHelper.CreateRandomNumber(), directoryName);
+            await AzureStorageTestHelper.CreateTestFilesAsync(_fileShare, numberOfFilesToCreate, directoryName);
 
             // Act
             await _sut.DeleteDirectoryAsync(directoryName);
