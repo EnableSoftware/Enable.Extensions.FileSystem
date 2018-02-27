@@ -9,7 +9,7 @@ using Microsoft.WindowsAzure.Storage.File;
 
 namespace Enable.Extensions.FileSystem.Test
 {
-    internal static class AzureStorageTestHelper
+    internal static class AzureFileStorageTestHelper
     {
         internal static string CreateRandomString()
         {
@@ -30,55 +30,6 @@ namespace Enable.Extensions.FileSystem.Test
         {
             var rng = new Random();
             return rng.Next(minValue, maxValue);
-        }
-
-        internal static Task CreateTestFilesAsync(CloudBlobContainer container, int count, string prefix = null)
-        {
-            prefix = prefix ?? string.Empty;
-
-            var tasks = Enumerable.Range(0, count)
-                .Select(o => Path.GetRandomFileName())
-                .Select(o => Path.Combine(prefix, o))
-                .Select(o => CreateTestFileAsync(container, o))
-                .ToArray();
-
-            return Task.WhenAll(tasks);
-        }
-
-        internal static Task CreateTestFileAsync(CloudBlobContainer container, string path)
-        {
-            var contents = CreateRandomString();
-
-            return CreateTestFileAsync(container, path, contents);
-        }
-
-        internal static Task CreateTestFileAsync(CloudBlobContainer container, string path, string contents)
-        {
-            var blob = container.GetBlockBlobReference(path);
-
-            return blob.UploadTextAsync(contents);
-        }
-
-        internal static Task<bool> ExistsAsync(CloudBlobContainer container, string path)
-        {
-            var blob = container.GetBlockBlobReference(path);
-
-            return blob.ExistsAsync();
-        }
-
-        internal static async Task<string> ReadFileContents(CloudBlobContainer container, string path)
-        {
-            var blob = container.GetBlockBlobReference(path);
-
-            string content;
-            using (var stream = new MemoryStream())
-            {
-                await blob.DownloadToStreamAsync(stream);
-
-                content = Encoding.UTF8.GetString(stream.ToArray());
-            }
-
-            return content;
         }
 
         internal static Task CreateTestFilesAsync(CloudFileShare fileShare, int count, string directory = null)
