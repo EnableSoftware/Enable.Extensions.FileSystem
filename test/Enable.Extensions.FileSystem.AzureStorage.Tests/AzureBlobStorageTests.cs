@@ -19,59 +19,69 @@ namespace Enable.Extensions.FileSystem.Test
     public class AzureBlobStorageTests : IClassFixture<AzureStorageTestFixture>, IDisposable
     {
         private readonly CloudBlobContainer _container;
-        private readonly AzureBlobStorage _sut;
+        private readonly CloudBlobClient _storageClient;
+        private readonly string _containerName;
 
+        private AzureBlobStorage _sut;
         private bool _disposed;
 
         public AzureBlobStorageTests(AzureStorageTestFixture fixture)
         {
             var storageAccount = fixture.StorageAccount;
 
-            var storageClient = storageAccount.CreateCloudBlobClient();
+            _storageClient = storageAccount.CreateCloudBlobClient();
 
-            var containerName = Guid.NewGuid().ToString();
+            _containerName = Guid.NewGuid().ToString();
 
-            _container = storageClient.GetContainerReference(containerName);
+            _container = _storageClient.GetContainerReference(_containerName);
 
             _container.CreateIfNotExistsAsync()
                 .GetAwaiter()
                 .GetResult();
 
-            _sut = new AzureBlobStorage(storageClient, containerName);
+            _sut = new AzureBlobStorage(_storageClient, _containerName);
         }
 
-        [Fact]
-        public async Task CopyFileAsync_SucceedsIfSourceFileExists()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task CopyFileAsync_SucceedsIfSourceFileExists(BlobType blobType)
         {
             // Arrange
             var source = Path.GetRandomFileName();
             var target = Path.GetRandomFileName();
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, source);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.CopyFileAsync(source, target);
 
             // Assert
-            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, source));
-            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, target));
+            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, source));
+            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, target));
         }
 
-        [Fact]
-        public async Task CopyFileAsync_CanMoveAcrossSubDirectories()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task CopyFileAsync_CanMoveAcrossSubDirectories(BlobType blobType)
         {
             // Arrange
             var source = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
             var target = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, source);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.CopyFileAsync(source, target);
 
             // Assert
-            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, source));
-            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, target));
+            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, source));
+            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, target));
         }
 
         [Fact]
@@ -89,35 +99,43 @@ namespace Enable.Extensions.FileSystem.Test
             Assert.IsAssignableFrom<StorageException>(exception);
         }
 
-        [Fact]
-        public async Task DeleteFileAsync_SucceedsIfFileExists()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task DeleteFileAsync_SucceedsIfFileExists(BlobType blobType)
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, fileName);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.DeleteFileAsync(fileName);
 
             // Assert
-            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, fileName));
+            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, fileName));
         }
 
-        [Fact]
-        public async Task DeleteDirectoryAsync_CanDeleteFromSubDirectory()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task DeleteDirectoryAsync_CanDeleteFromSubDirectory(BlobType blobType)
         {
             // Arrange
             var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
             var directoryName = Path.GetRandomFileName();
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, Path.Combine(directoryName, fileName));
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, Path.Combine(directoryName, fileName));
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.DeleteDirectoryAsync(directoryName);
 
             // Assert
-            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, Path.Combine(directoryName, fileName)));
+            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, Path.Combine(directoryName, fileName)));
         }
 
         [Fact]
@@ -130,8 +148,11 @@ namespace Enable.Extensions.FileSystem.Test
             await _sut.DeleteDirectoryAsync(directoryName);
         }
 
-        [Fact]
-        public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExists()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task DeleteDirectoryAsync_SucceedsIfDirectoryExists(BlobType blobType)
         {
             // Arrange
             var directoryName = Path.GetRandomFileName();
@@ -140,28 +161,33 @@ namespace Enable.Extensions.FileSystem.Test
                 minValue: 1, // Ensure that we always create at least one test file.
                 maxValue: byte.MaxValue);
 
-            await AzureBlobStorageTestHelper.CreateTestFilesAsync(_container, numberOfFilesToCreate, directoryName);
+            await AzureBlobStorageTestHelper.CreateTestFilesAsync(_container, blobType, numberOfFilesToCreate, directoryName);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.DeleteDirectoryAsync(directoryName);
 
             // Assert
-            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, directoryName));
+            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, directoryName));
         }
 
-        [Fact]
-        public async Task DeleteFileAsync_CanDeleteFromSubDirectory()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task DeleteFileAsync_CanDeleteFromSubDirectory(BlobType blobType)
         {
             // Arrange
             var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, fileName);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.DeleteFileAsync(fileName);
 
             // Assert
-            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, fileName));
+            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, fileName));
         }
 
         [Fact]
@@ -184,23 +210,30 @@ namespace Enable.Extensions.FileSystem.Test
             Assert.Empty(result);
         }
 
-        [Fact]
-        public async Task GetDirectoryContentsAsync_ReturnsFileList()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task GetDirectoryContentsAsync_ReturnsFileList(BlobType blobType)
         {
             // Arrange
-            var filesCount = AzureBlobStorageTestHelper.CreateRandomNumber();
+            var filesCount = AzureBlobStorageTestHelper.CreateRandomNumber(10);
 
-            await AzureBlobStorageTestHelper.CreateTestFilesAsync(_container, filesCount);
+            await AzureBlobStorageTestHelper.CreateTestFilesAsync(_container, blobType, filesCount);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             var result = await _sut.GetDirectoryContentsAsync(string.Empty);
 
             // Assert
             Assert.Equal(filesCount, result.Count());
         }
 
-        [Fact]
-        public async Task GetDirectoryContentsAsync_ReturnsFileListForSubDirectory()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task GetDirectoryContentsAsync_ReturnsFileListForSubDirectory(BlobType blobType)
         {
             // Arrange
             var subpath = Path.GetRandomFileName();
@@ -209,10 +242,12 @@ namespace Enable.Extensions.FileSystem.Test
 
             await AzureBlobStorageTestHelper.CreateTestFilesAsync(
                 _container,
+                blobType,
                 filesCount,
                 subpath);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             var result = await _sut.GetDirectoryContentsAsync(subpath);
 
             // Assert
@@ -232,8 +267,11 @@ namespace Enable.Extensions.FileSystem.Test
             Assert.False(result.Exists);
         }
 
-        [Fact]
-        public async Task GetFileInfoAsync_ReturnsFileInfoIfFileExists()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task GetFileInfoAsync_ReturnsFileInfoIfFileExists(BlobType blobType)
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
@@ -241,9 +279,10 @@ namespace Enable.Extensions.FileSystem.Test
             var expectedFileName = Path.GetFileName(fileName);
             var expectedFilePath = fileName;
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, fileName);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             var result = await _sut.GetFileInfoAsync(fileName);
 
             // Assert
@@ -253,8 +292,11 @@ namespace Enable.Extensions.FileSystem.Test
             Assert.Equal(expectedFilePath, result.Path);
         }
 
-        [Fact]
-        public async Task GetFileInfoAsync_ReturnsFileInfoForFileInSubDirectory()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task GetFileInfoAsync_ReturnsFileInfoForFileInSubDirectory(BlobType blobType)
         {
             // Arrange
             var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
@@ -262,9 +304,10 @@ namespace Enable.Extensions.FileSystem.Test
             var expectedFileName = Path.GetFileName(fileName);
             var expectedFilePath = fileName;
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, fileName);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             var result = await _sut.GetFileInfoAsync(fileName);
 
             // Assert
@@ -288,17 +331,21 @@ namespace Enable.Extensions.FileSystem.Test
             Assert.Equal(fileName, result.Name);
         }
 
-        [Fact]
-        public async Task GetFileStreamAsync_ReturnsFileStreamIfFileExists()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task GetFileStreamAsync_ReturnsFileStreamIfFileExists(BlobType blobType)
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
 
-            var expectedContents = AzureBlobStorageTestHelper.CreateRandomString();
+            var expectedContents = AzureBlobStorageTestHelper.CreateRandomString(blobType);
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, fileName, expectedContents);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName, expectedContents);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             using (var stream = await _sut.GetFileStreamAsync(fileName))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
@@ -309,17 +356,21 @@ namespace Enable.Extensions.FileSystem.Test
             }
         }
 
-        [Fact]
-        public async Task GetFileStreamAsync_ReturnsFileStreamForFileInSubDirectory()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task GetFileStreamAsync_ReturnsFileStreamForFileInSubDirectory(BlobType blobType)
         {
             // Arrange
             var fileName = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
-            var expectedContents = AzureBlobStorageTestHelper.CreateRandomString();
+            var expectedContents = AzureBlobStorageTestHelper.CreateRandomString(blobType);
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, fileName, expectedContents);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName, expectedContents);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             using (var stream = await _sut.GetFileStreamAsync(fileName))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
@@ -357,38 +408,46 @@ namespace Enable.Extensions.FileSystem.Test
             Assert.IsAssignableFrom<StorageException>(exception);
         }
 
-        [Fact]
-        public async Task RenameFileAsync_SucceedsIfSourceFileExists()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task RenameFileAsync_SucceedsIfSourceFileExists(BlobType blobType)
         {
             // Arrange
             var source = Path.GetRandomFileName();
             var target = Path.GetRandomFileName();
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, source);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.RenameFileAsync(source, target);
 
             // Assert
-            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, source));
-            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, target));
+            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, source));
+            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, target));
         }
 
-        [Fact]
-        public async Task RenameFileAsync_CanRenameAcrossSubDirectories()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task RenameFileAsync_CanRenameAcrossSubDirectories(BlobType blobType)
         {
             // Arrange
             var source = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
             var target = Path.Combine(Path.GetRandomFileName(), Path.GetRandomFileName());
 
-            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, source);
+            await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
             await _sut.RenameFileAsync(source, target);
 
             // Assert
-            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, source));
-            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, target));
+            Assert.False(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, source));
+            Assert.True(await AzureBlobStorageTestHelper.ExistsAsync(_container, blobType, target));
         }
 
         [Fact]
@@ -436,22 +495,28 @@ namespace Enable.Extensions.FileSystem.Test
             }
         }
 
-        [Fact]
-        public async Task SaveFileAsync_SavesCorrectContent()
+        [InlineData(BlobType.BlockBlob)]
+        [InlineData(BlobType.PageBlob)]
+        [InlineData(BlobType.AppendBlob)]
+        [Theory]
+        public async Task SaveFileAsync_SavesCorrectContent(BlobType blobType)
         {
             // Arrange
             var fileName = Path.GetRandomFileName();
 
-            var expectedContents = AzureBlobStorageTestHelper.CreateRandomString();
+            var expectedContents = AzureBlobStorageTestHelper.CreateRandomString(blobType);
+            var byteArray = Encoding.UTF8.GetBytes(expectedContents);
 
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(expectedContents)))
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+
+            using (var stream = new MemoryStream(byteArray))
             {
                 // Act
                 await _sut.SaveFileAsync(fileName, stream);
             }
 
             // Assert
-            var actualContents = await AzureBlobStorageTestHelper.ReadFileContents(_container, fileName);
+            var actualContents = await AzureBlobStorageTestHelper.ReadFileContents(_container, blobType, fileName);
 
             Assert.Equal(expectedContents, actualContents);
         }

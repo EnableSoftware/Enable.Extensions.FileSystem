@@ -13,25 +13,32 @@ namespace Enable.Extensions.FileSystem
     public class AzureBlobStorage : BaseFileSystem
     {
         private readonly CloudBlobContainer _container;
+        private readonly BlobType _blobType;
 
-        public AzureBlobStorage(string accountName, string accountKey, string containerName)
+        public AzureBlobStorage(string accountName, string accountKey, string containerName, string blobType = "BlockBlob")
         {
+            var blobTypeEnum = SetBlobType(blobType);
+
             var credentials = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
 
             var client = storageAccount.CreateCloudBlobClient();
 
             _container = client.GetContainerReference(containerName);
+            _blobType = blobTypeEnum;
         }
 
-        public AzureBlobStorage(CloudBlobClient client, string containerName)
+        public AzureBlobStorage(CloudBlobClient client, string containerName, string blobType = "BlockBlob")
         {
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
             }
 
+            var blobTypeEnum = SetBlobType(blobType);
+
             _container = client.GetContainerReference(containerName);
+            _blobType = blobTypeEnum;
         }
 
         public override async Task CopyFileAsync(
@@ -41,13 +48,39 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
-            var sourceBlob = _container.GetBlockBlobReference(sourcePath);
-            var targetBlob = _container.GetBlockBlobReference(targetPath);
+            CloudBlob sourceBlob;
+            CloudBlob targetBlob;
 
             // The following only initiates a copy. There does not appear a way
             // to wait until the copy is complete without monitoring the copy
             // status of the target file.
-            await targetBlob.StartCopyAsync(sourceBlob);
+            switch (_blobType)
+            {
+                default:
+                case BlobType.BlockBlob:
+                    sourceBlob = _container.GetBlockBlobReference(sourcePath);
+                    targetBlob = _container.GetBlockBlobReference(targetPath);
+
+                    await ((CloudBlockBlob)targetBlob).StartCopyAsync((CloudBlockBlob)sourceBlob);
+                    break;
+                case BlobType.AppendBlob:
+                    sourceBlob = _container.GetAppendBlobReference(sourcePath);
+                    targetBlob = _container.GetAppendBlobReference(targetPath);
+
+                    await ((CloudAppendBlob)targetBlob).StartCopyAsync((CloudAppendBlob)sourceBlob);
+                    break;
+                case BlobType.PageBlob:
+                    sourceBlob = _container.GetPageBlobReference(sourcePath);
+                    targetBlob = _container.GetPageBlobReference(targetPath);
+
+                    await ((CloudPageBlob)targetBlob).StartCopyAsync((CloudPageBlob)sourceBlob);
+                    break;
+            }
+
+            if (targetBlob.CopyState.Status != CopyStatus.Success)
+            {
+                throw new NotSupportedException();
+            }
 
             // However, for a file copy operation within the same storage
             // account, we can assume that the copy operation has completed
@@ -87,7 +120,7 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
-            var blob = _container.GetBlockBlobReference(path);
+            var blob = GetBlobReference(path);
 
             await blob.DeleteIfExistsAsync();
         }
@@ -136,7 +169,7 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
-            var blob = _container.GetBlockBlobReference(path);
+            var blob = GetBlobReference(path);
 
             try
             {
@@ -158,7 +191,7 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
-            var blob = _container.GetBlockBlobReference(path);
+            var blob = GetBlobReference(path);
 
             return await blob.OpenReadAsync();
         }
@@ -170,7 +203,7 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
-            var sourceBlob = _container.GetBlockBlobReference(sourcePath);
+            var sourceBlob = GetBlobReference(sourcePath);
 
             // It is not currently possible to rename a blob in Azure. We
             // therefore attempt a copy and then delete. Note, however, that
@@ -187,9 +220,48 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
-            var blob = _container.GetBlockBlobReference(path);
+            switch (_blobType)
+            {
+                default:
+                case BlobType.BlockBlob:
+                    var blockBlob = _container.GetBlockBlobReference(path);
+                    await blockBlob.UploadFromStreamAsync(stream);
+                    return;
+                case BlobType.AppendBlob:
+                    var appendBlob = _container.GetAppendBlobReference(path);
+                    await appendBlob.UploadFromStreamAsync(stream);
+                    return;
+                case BlobType.PageBlob:
+                    var pageBlob = _container.GetPageBlobReference(path);
+                    await pageBlob.UploadFromStreamAsync(stream);
+                    return;
+            }
+        }
 
-            await blob.UploadFromStreamAsync(stream);
+        private CloudBlob GetBlobReference(string path)
+        {
+            switch (_blobType)
+            {
+                default:
+                case BlobType.BlockBlob:
+                    return _container.GetBlockBlobReference(path);
+                case BlobType.AppendBlob:
+                    return _container.GetAppendBlobReference(path);
+                case BlobType.PageBlob:
+                    return _container.GetPageBlobReference(path);
+            }
+        }
+
+        private BlobType SetBlobType(string blobType)
+        {
+            BlobType blobTypeEnum;
+            if (!Enum.TryParse<BlobType>(blobType, out blobTypeEnum)
+                || blobTypeEnum == BlobType.Unspecified)
+            {
+                throw new ArgumentException("Invalid blobType specified. Permitted values: PageBlob, BlockBlob, AppendBlob");
+            }
+
+            return blobTypeEnum;
         }
     }
 }

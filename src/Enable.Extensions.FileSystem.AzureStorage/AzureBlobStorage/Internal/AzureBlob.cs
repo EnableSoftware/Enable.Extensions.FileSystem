@@ -5,13 +5,13 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {
     internal class AzureBlob : IFile
     {
-        private readonly CloudBlockBlob _blob;
+        private readonly CloudBlob _blob;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureBlob"/> class.
         /// </summary>
-        /// <param name="fileInfo">The <see cref="CloudBlockBlob"/> to wrap.</param>
-        public AzureBlob(CloudBlockBlob blob)
+        /// <param name="fileInfo">The <see cref="CloudBlob"/> to wrap.</param>
+        public AzureBlob(CloudBlob blob)
         {
             _blob = blob;
         }

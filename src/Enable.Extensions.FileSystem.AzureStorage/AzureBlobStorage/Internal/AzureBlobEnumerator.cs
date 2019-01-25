@@ -84,9 +84,9 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
                 _currentSegment = response.Results
                     .Select<IListBlobItem, IFile>((item) =>
                     {
-                        if (item is CloudBlockBlob)
+                        if (item is CloudBlob)
                         {
-                            return new AzureBlob(item as CloudBlockBlob);
+                            return new AzureBlob(item as CloudBlob);
                         }
                         else if (item is CloudBlobDirectory)
                         {

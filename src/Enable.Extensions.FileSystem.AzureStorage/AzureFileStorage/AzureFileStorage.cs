@@ -55,7 +55,7 @@ namespace Enable.Extensions.FileSystem
             // However, for a file copy operation within the same storage
             // account, we can assume that the copy operation has completed
             // when `StartCopyAsync` completes. Here we check this assumption.
-            if (targetFile.CopyState.Status != CopyStatus.Success)
+            if (targetFile.CopyState.Status != Microsoft.WindowsAzure.Storage.File.CopyStatus.Success)
             {
                 // TODO Consider if we can handle this case better.
                 throw new NotSupportedException();

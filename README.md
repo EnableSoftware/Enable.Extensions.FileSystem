@@ -115,7 +115,7 @@ need to do is:
    to:
 
    ```csharp
-   using (var fileSystem = new AzureBlobStorage("account-name", "account-key", "container-name"))
+   using (var fileSystem = new AzureBlobStorage("account-name", "account-key", "container-name", "BlockBlob"))
    ```
 
 The rest of the sample remains unchanged!
@@ -123,9 +123,11 @@ The rest of the sample remains unchanged!
 Here `account-name` is the name of your own Azure Storage account and
 `account-key` the key to use to access the account. The steps you need to
 take to obtain this from the Azure Portal can be found in the article
-[Configure Azure Storage connection strings]. Finally, here we're using
+[Configure Azure Storage connection strings]. Here we're using
 [Azure Blob Storage], so we need to specify a container name, which we
 do as the third parameter to the `AzureBlobStorage` constructor.
+The final parameter `BlockBlob` is to specify which type of Blob storage to
+use, the options are `BlockBlob`, `AppendBlob` and `PageBlob`, if no value is passed it will default to `BlockBlob`.
 
 [Azure Storage]: https://azure.microsoft.com/services/storage/
 [Azure Blob Storage]: https://azure.microsoft.com/services/storage/blobs/
