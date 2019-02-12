@@ -15,30 +15,46 @@ namespace Enable.Extensions.FileSystem
         private readonly CloudBlobContainer _container;
         private readonly BlobType _blobType;
 
-        public AzureBlobStorage(string accountName, string accountKey, string containerName, string blobType = "BlockBlob")
+        public AzureBlobStorage(
+            string accountName,
+            string accountKey,
+            string containerName,
+            BlobType blobType)
         {
-            var blobTypeEnum = SetBlobType(blobType);
-
             var credentials = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
 
             var client = storageAccount.CreateCloudBlobClient();
 
             _container = client.GetContainerReference(containerName);
-            _blobType = blobTypeEnum;
+            _blobType = blobType;
         }
 
-        public AzureBlobStorage(CloudBlobClient client, string containerName, string blobType = "BlockBlob")
+        public AzureBlobStorage(
+            string accountName,
+            string accountKey,
+            string containerName)
+            : this(accountName, accountKey, containerName, BlobType.BlockBlob)
+        {
+        }
+
+        public AzureBlobStorage(
+            CloudBlobClient client,
+            string containerName,
+            BlobType blobType)
         {
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
             }
 
-            var blobTypeEnum = SetBlobType(blobType);
-
             _container = client.GetContainerReference(containerName);
-            _blobType = blobTypeEnum;
+            _blobType = blobType;
+        }
+
+        public AzureBlobStorage(CloudBlobClient client, string containerName)
+            : this(client, containerName, BlobType.BlockBlob)
+        {
         }
 
         public override async Task CopyFileAsync(
@@ -48,38 +64,30 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
-            CloudBlob sourceBlob;
-            CloudBlob targetBlob;
+            var sourceBlob = GetBlobReference(sourcePath);
+            var targetBlob = GetBlobReference(targetPath);
 
             // The following only initiates a copy. There does not appear a way
             // to wait until the copy is complete without monitoring the copy
             // status of the target file.
             switch (_blobType)
             {
-                default:
                 case BlobType.BlockBlob:
-                    sourceBlob = _container.GetBlockBlobReference(sourcePath);
-                    targetBlob = _container.GetBlockBlobReference(targetPath);
-
+                case BlobType.Unspecified:
                     await ((CloudBlockBlob)targetBlob).StartCopyAsync((CloudBlockBlob)sourceBlob);
                     break;
-                case BlobType.AppendBlob:
-                    sourceBlob = _container.GetAppendBlobReference(sourcePath);
-                    targetBlob = _container.GetAppendBlobReference(targetPath);
 
+                case BlobType.AppendBlob:
                     await ((CloudAppendBlob)targetBlob).StartCopyAsync((CloudAppendBlob)sourceBlob);
                     break;
-                case BlobType.PageBlob:
-                    sourceBlob = _container.GetPageBlobReference(sourcePath);
-                    targetBlob = _container.GetPageBlobReference(targetPath);
 
+                case BlobType.PageBlob:
                     await ((CloudPageBlob)targetBlob).StartCopyAsync((CloudPageBlob)sourceBlob);
                     break;
-            }
 
-            if (targetBlob.CopyState.Status != CopyStatus.Success)
-            {
-                throw new NotSupportedException();
+                default:
+                    // This shouldn't happen unless Azure Storage introduces a new blob type.
+                    throw new NotSupportedException("Unexpected blob type.");
             }
 
             // However, for a file copy operation within the same storage
@@ -220,21 +228,26 @@ namespace Enable.Extensions.FileSystem
         {
             await _container.CreateIfNotExistsAsync();
 
+            var blob = GetBlobReference(path);
+
             switch (_blobType)
             {
-                default:
                 case BlobType.BlockBlob:
-                    var blockBlob = _container.GetBlockBlobReference(path);
-                    await blockBlob.UploadFromStreamAsync(stream);
+                case BlobType.Unspecified:
+                    await ((CloudBlockBlob)blob).UploadFromStreamAsync(stream);
                     return;
+
                 case BlobType.AppendBlob:
-                    var appendBlob = _container.GetAppendBlobReference(path);
-                    await appendBlob.UploadFromStreamAsync(stream);
+                    await ((CloudAppendBlob)blob).UploadFromStreamAsync(stream);
                     return;
+
                 case BlobType.PageBlob:
-                    var pageBlob = _container.GetPageBlobReference(path);
-                    await pageBlob.UploadFromStreamAsync(stream);
+                    await ((CloudPageBlob)blob).UploadFromStreamAsync(stream);
                     return;
+
+                default:
+                    // This shouldn't happen unless Azure Storage introduces a new blob type.
+                    throw new NotSupportedException("Unexpected blob type.");
             }
         }
 
@@ -242,26 +255,20 @@ namespace Enable.Extensions.FileSystem
         {
             switch (_blobType)
             {
-                default:
                 case BlobType.BlockBlob:
+                case BlobType.Unspecified:
                     return _container.GetBlockBlobReference(path);
+
                 case BlobType.AppendBlob:
                     return _container.GetAppendBlobReference(path);
+
                 case BlobType.PageBlob:
                     return _container.GetPageBlobReference(path);
-            }
-        }
 
-        private BlobType SetBlobType(string blobType)
-        {
-            BlobType blobTypeEnum;
-            if (!Enum.TryParse<BlobType>(blobType, out blobTypeEnum)
-                || blobTypeEnum == BlobType.Unspecified)
-            {
-                throw new ArgumentException("Invalid blobType specified. Permitted values: PageBlob, BlockBlob, AppendBlob");
+                default:
+                    // This shouldn't happen unless Azure Storage introduces a new blob type.
+                    throw new NotSupportedException("Unexpected blob type.");
             }
-
-            return blobTypeEnum;
         }
     }
 }

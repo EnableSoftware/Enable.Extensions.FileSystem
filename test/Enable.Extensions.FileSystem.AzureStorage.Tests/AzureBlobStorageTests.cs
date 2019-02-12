@@ -55,7 +55,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.CopyFileAsync(source, target);
 
             // Assert
@@ -76,7 +76,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.CopyFileAsync(source, target);
 
             // Assert
@@ -111,7 +111,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.DeleteFileAsync(fileName);
 
             // Assert
@@ -131,7 +131,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, Path.Combine(directoryName, fileName));
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.DeleteDirectoryAsync(directoryName);
 
             // Assert
@@ -164,7 +164,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFilesAsync(_container, blobType, numberOfFilesToCreate, directoryName);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.DeleteDirectoryAsync(directoryName);
 
             // Assert
@@ -183,7 +183,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.DeleteFileAsync(fileName);
 
             // Assert
@@ -222,7 +222,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFilesAsync(_container, blobType, filesCount);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             var result = await _sut.GetDirectoryContentsAsync(string.Empty);
 
             // Assert
@@ -247,7 +247,7 @@ namespace Enable.Extensions.FileSystem.Test
                 subpath);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             var result = await _sut.GetDirectoryContentsAsync(subpath);
 
             // Assert
@@ -282,7 +282,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             var result = await _sut.GetFileInfoAsync(fileName);
 
             // Assert
@@ -307,7 +307,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             var result = await _sut.GetFileInfoAsync(fileName);
 
             // Assert
@@ -345,7 +345,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName, expectedContents);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             using (var stream = await _sut.GetFileStreamAsync(fileName))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
@@ -370,7 +370,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, fileName, expectedContents);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             using (var stream = await _sut.GetFileStreamAsync(fileName))
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
@@ -421,7 +421,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.RenameFileAsync(source, target);
 
             // Assert
@@ -442,7 +442,7 @@ namespace Enable.Extensions.FileSystem.Test
             await AzureBlobStorageTestHelper.CreateTestFileAsync(_container, blobType, source);
 
             // Act
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
             await _sut.RenameFileAsync(source, target);
 
             // Assert
@@ -507,7 +507,7 @@ namespace Enable.Extensions.FileSystem.Test
             var expectedContents = AzureBlobStorageTestHelper.CreateRandomString(blobType);
             var byteArray = Encoding.UTF8.GetBytes(expectedContents);
 
-            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType.ToString());
+            _sut = new AzureBlobStorage(_storageClient, _containerName, blobType);
 
             using (var stream = new MemoryStream(byteArray))
             {
