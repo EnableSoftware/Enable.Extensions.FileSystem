@@ -21,7 +21,7 @@ namespace Enable.Extensions.FileSystem.Test
             {
                 _useDevelopmentStorageAccount = true;
 
-                // Fallback to using the Azure Storage emulator if we did't find a connection
+                // Fallback to using the Azure Storage emulator if we didn't find a connection
                 // string in the relevant environment variable. This should only be the case
                 // at development time. CI builds will set this environment variable.
                 // Note that the Azure Storage Emulator does not yet support Azure File Storage,

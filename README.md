@@ -54,7 +54,7 @@ namespace FileSystemSamples
             // want to work with.
             var directory = @"C:\some\absolute\path";
             
-            // We then construct a represention of the physical file system
+            // We then construct a representation of the physical file system
             // under this directory. Note that the files we want to work must
             // be rooted under `directory`. If we try walking out of this
             // directory then we'll be hit with an exception.
@@ -87,7 +87,7 @@ namespace FileSystemSamples
 
                 // Finally, let's be good citizens and clean up after ourselves
                 // by deleting the file we just created. If we don't do this,
-                // the file will long on forever, long after we dispose of our
+                // the file will live on forever, long after we dispose of our
                 // `fileSystem`.
                 await fileSystem.DeleteFileAsync(filePath);
             }

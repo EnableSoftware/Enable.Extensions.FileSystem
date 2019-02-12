@@ -140,7 +140,7 @@ namespace Enable.Extensions.FileSystem
             await _container.CreateIfNotExistsAsync();
 
             // The implementation of this method differs from the File Storage implementation.
-            // With Blob Storage there is no concept of a "directory". Path segements in file names
+            // With Blob Storage there is no concept of a "directory". Path segments in file names
             // are considered part of the file name, or a filename "prefix". There is therefore no
             // equivalent of `CloudFileDirectory.ExistsAsync()` on a `CloudBlobDirectory`. A
             // "directory" therefore only exists if there is a file whose name contains this

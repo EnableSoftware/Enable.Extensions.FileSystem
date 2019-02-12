@@ -71,7 +71,7 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
                 {
                     // If we've previously seen a result segment but we don't
                     // have a continuation token, then there are no further
-                    // result segements to retrieve.
+                    // result segments to retrieve.
                     return false;
                 }
 

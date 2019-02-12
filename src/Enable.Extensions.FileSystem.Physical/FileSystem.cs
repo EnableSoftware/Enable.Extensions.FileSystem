@@ -186,7 +186,7 @@ namespace Enable.Extensions.FileSystem
 
             var fullPath = PathHelper.GetFullPath(_directory, path);
 
-            // Sub-paths must be within sub-directoryies of the root directry.
+            // Sub-paths must be within sub-directories of the root directory.
             if (!PathHelper.IsUnderneathRoot(_directory, fullPath))
             {
                 throw new InvalidOperationException("Paths must be a relative sub-path.");
