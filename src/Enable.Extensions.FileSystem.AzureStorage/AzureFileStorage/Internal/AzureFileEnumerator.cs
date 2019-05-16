@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.WindowsAzure.Storage.File;
+using Microsoft.Azure.Storage.File;
 
 namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {

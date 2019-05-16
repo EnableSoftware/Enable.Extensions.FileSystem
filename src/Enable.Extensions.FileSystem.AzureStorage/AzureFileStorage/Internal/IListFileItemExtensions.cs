@@ -1,6 +1,6 @@
 using System.IO;
 using System.Linq;
-using Microsoft.WindowsAzure.Storage.File;
+using Microsoft.Azure.Storage.File;
 
 namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {

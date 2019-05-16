@@ -1,5 +1,5 @@
 using System;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Storage;
 
 namespace Enable.Extensions.FileSystem.Test
 {

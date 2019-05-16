@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Storage;
 
 namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {

@@ -4,10 +4,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Enable.Extensions.FileSystem.AzureStorage.Internal;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Auth;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.File;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Auth;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.File;
 
 namespace Enable.Extensions.FileSystem
 {
@@ -55,7 +55,7 @@ namespace Enable.Extensions.FileSystem
             // However, for a file copy operation within the same storage
             // account, we can assume that the copy operation has completed
             // when `StartCopyAsync` completes. Here we check this assumption.
-            if (targetFile.CopyState.Status != Microsoft.WindowsAzure.Storage.File.CopyStatus.Success)
+            if (targetFile.CopyState.Status != Microsoft.Azure.Storage.File.CopyStatus.Success)
             {
                 // TODO Consider if we can handle this case better.
                 throw new NotSupportedException();

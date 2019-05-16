@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.File;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.File;
 
 namespace Enable.Extensions.FileSystem.Test
 {
