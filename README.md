@@ -78,7 +78,7 @@ namespace FileSystemSamples
                 Console.WriteLine(fileInfo.Exists) 
 
                 // Now let's try and read the contents of this file.
-                using (var stream = await _sut.GetFileStreamAsync(filePath))
+                using (var stream = await fileSystem.GetFileStreamAsync(filePath))
                 using (var reader = new StreamReader(stream, Encoding.UTF8))
                 {
                     // Here `text` will be the string `"Hello, World!"`.
