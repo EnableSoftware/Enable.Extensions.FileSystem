@@ -1,11 +1,10 @@
 using System;
-using Microsoft.Azure.Storage;
 
 namespace Enable.Extensions.FileSystem.Test
 {
     public class AzureStorageTestFixture : IDisposable
     {
-        private readonly CloudStorageAccount _storageAccount;
+        private readonly string _connectionString;
         private readonly AzureStorageEmulatorManager _azureStorageEmulatorManager;
         private readonly bool _useDevelopmentStorageAccount;
         private readonly bool _emulatorAlreadyRunning;
@@ -16,17 +15,19 @@ namespace Enable.Extensions.FileSystem.Test
         {
             var connectionString = Environment.GetEnvironmentVariable("AZURE_STORAGE_ACCOUNT_CONNECTION_STRING");
 
+            _connectionString = connectionString;
+
 #if DEBUG
             if (string.IsNullOrEmpty(connectionString))
             {
                 _useDevelopmentStorageAccount = true;
 
-                // Fallback to using the Azure Storage emulator if we didn't find a connection
-                // string in the relevant environment variable. This should only be the case
-                // at development time. CI builds will set this environment variable.
-                // Note that the Azure Storage Emulator does not yet support Azure File Storage,
-                // so Azure File Storage tests will fail if running with the emulator.
-                _storageAccount = CloudStorageAccount.DevelopmentStorageAccount;
+                //// Fallback to using the Azure Storage emulator if we didn't find a connection
+                //// string in the relevant environment variable. This should only be the case
+                //// at development time. CI builds will set this environment variable.
+                //// Note that the Azure Storage Emulator does not yet support Azure File Storage,
+                //// so Azure File Storage tests will fail if running with the emulator.
+                _connectionString = "UseDevelopmentStorage=true";
 
                 // Here we attempt to auto-start the storage emulator if we're using
                 // the development storage account.
@@ -57,15 +58,13 @@ namespace Enable.Extensions.FileSystem.Test
                 return;
             }
 #endif
-
-            _storageAccount = CloudStorageAccount.Parse(connectionString);
         }
 
-        public CloudStorageAccount StorageAccount
+        public string ConnectionString
         {
             get
             {
-                return _storageAccount;
+                return _connectionString;
             }
         }
 

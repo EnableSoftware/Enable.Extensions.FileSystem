@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.File;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Specialized;
 
 namespace Enable.Extensions.FileSystem.Test
 {
     internal static class AzureBlobStorageTestHelper
     {
-        internal static string CreateRandomString(BlobType blobType = BlobType.BlockBlob)
+        internal static string CreateRandomString(BlobType blobType = BlobType.Block)
         {
-            return blobType == BlobType.PageBlob
+            return blobType == BlobType.Page
                 ? new string('a', 512)
                 : Guid.NewGuid().ToString();
         }
@@ -34,7 +36,7 @@ namespace Enable.Extensions.FileSystem.Test
             return rng.Next(minValue, maxValue);
         }
 
-        internal static Task CreateTestFilesAsync(CloudBlobContainer container, BlobType blobType, int count, string prefix = null)
+        internal static Task CreateTestFilesAsync(BlobContainerClient container, BlobType blobType, int count, string prefix = null)
         {
             prefix = prefix ?? string.Empty;
 
@@ -47,49 +49,68 @@ namespace Enable.Extensions.FileSystem.Test
             return Task.WhenAll(tasks);
         }
 
-        internal static Task CreateTestFileAsync(CloudBlobContainer container, BlobType blobType, string path)
+        internal static Task CreateTestFileAsync(BlobContainerClient container, BlobType blobType, string path)
         {
             var contents = CreateRandomString(blobType);
 
             return CreateTestFileAsync(container, blobType, path, contents);
         }
 
-        internal static Task CreateTestFileAsync(CloudBlobContainer container, BlobType blobType, string path, string contents)
+        internal static async Task CreateTestFileAsync(BlobContainerClient container, BlobType blobType, string path, string contents)
         {
             switch (blobType)
             {
                 default:
-                case BlobType.BlockBlob:
-                    var blockBlob = container.GetBlockBlobReference(path);
+                case BlobType.Block:
+                    var blockBlob = container.GetBlockBlobClient(path);
 
-                    return blockBlob.UploadTextAsync(contents);
-                case BlobType.AppendBlob:
-                    var appendBlob = container.GetAppendBlobReference(path);
+                    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
+                    {
+                        await blockBlob.UploadAsync(stream);
+                    }
 
-                    return appendBlob.UploadTextAsync(contents);
-                case BlobType.PageBlob:
-                    var pageBlob = container.GetPageBlobReference(path);
+                    return;
+
+                case BlobType.Append:
+                    var appendBlob = container.GetAppendBlobClient(path);
+
+                    using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(contents)))
+                    {
+                        await appendBlob.AppendBlockAsync(stream);
+                    }
+
+                    return;
+
+                case BlobType.Page:
+                    var pageBlob = container.GetPageBlobClient(path);
                     var byteArray = Encoding.UTF8.GetBytes(contents);
 
-                    return pageBlob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
+                    using (var stream = new MemoryStream(byteArray))
+                    {
+                        await pageBlob.UploadPagesAsync(stream, 0);
+                    }
+
+                    return;
             }
         }
 
-        internal static Task<bool> ExistsAsync(CloudBlobContainer container, BlobType blobType, string path)
+        internal static async Task<bool> ExistsAsync(BlobContainerClient container, BlobType blobType, string path)
         {
             var blob = GetBlobReference(container, blobType, path);
 
-            return blob.ExistsAsync();
+            var exists = await blob.ExistsAsync();
+
+            return exists.Value;
         }
 
-        internal static async Task<string> ReadFileContents(CloudBlobContainer container, BlobType blobType, string path)
+        internal static async Task<string> ReadFileContents(BlobContainerClient container, BlobType blobType, string path)
         {
             var blob = GetBlobReference(container, blobType, path);
 
             string content;
             using (var stream = new MemoryStream())
             {
-                await blob.DownloadToStreamAsync(stream);
+                await blob.DownloadToAsync(stream);
 
                 content = Encoding.UTF8.GetString(stream.ToArray());
             }
@@ -97,17 +118,17 @@ namespace Enable.Extensions.FileSystem.Test
             return content;
         }
 
-        internal static CloudBlob GetBlobReference(CloudBlobContainer container, BlobType blobType, string path)
+        internal static BlobBaseClient GetBlobReference(BlobContainerClient container, BlobType blobType, string path)
         {
             switch (blobType)
             {
                 default:
-                case BlobType.BlockBlob:
-                    return container.GetBlockBlobReference(path);
-                case BlobType.AppendBlob:
-                    return container.GetAppendBlobReference(path);
-                case BlobType.PageBlob:
-                    return container.GetPageBlobReference(path);
+                case BlobType.Block:
+                    return container.GetBlockBlobClient(path);
+                case BlobType.Append:
+                    return container.GetAppendBlobClient(path);
+                case BlobType.Page:
+                    return container.GetPageBlobClient(path);
             }
         }
     }

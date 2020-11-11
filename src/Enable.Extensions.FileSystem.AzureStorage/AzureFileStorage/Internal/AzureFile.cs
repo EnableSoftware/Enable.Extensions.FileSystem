@@ -1,5 +1,5 @@
 using System;
-using Microsoft.Azure.Storage.File;
+using Azure.Storage.Files.Shares.Models;
 
 namespace Enable.Extensions.FileSystem.AzureStorage.Internal
 {
@@ -8,15 +8,19 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
     /// </summary>
     internal class AzureFile : IFile
     {
-        private readonly CloudFile _file;
+        private readonly ShareFileProperties _properties;
+        private readonly string _path;
+        private readonly string _name;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AzureFile"/> class.
         /// </summary>
         /// <param name="fileInfo">The <see cref="CloudFile"/> to wrap.</param>
-        public AzureFile(CloudFile file)
+        public AzureFile(ShareFileProperties properties, string path)
         {
-            _file = file;
+            _properties = properties;
+            _path = path;
+            _name = System.IO.Path.GetFileName(path);
         }
 
         /// <inheritdoc />
@@ -26,15 +30,15 @@ namespace Enable.Extensions.FileSystem.AzureStorage.Internal
         public bool IsDirectory => false;
 
         /// <inheritdoc />
-        public DateTimeOffset LastModified => _file.Properties.LastModified.GetValueOrDefault();
+        public DateTimeOffset LastModified => _properties.LastModified;
 
         /// <inheritdoc />
-        public long Length => _file.Properties.Length;
+        public long Length => _properties.ContentLength;
 
         /// <inheritdoc />
-        public string Name => _file.Name;
+        public string Name => _name;
 
         /// <inheritdoc />
-        public string Path => _file.GetRelativeSubpath();
+        public string Path => _path;
     }
 }
