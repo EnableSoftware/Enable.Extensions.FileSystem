@@ -14,12 +14,14 @@ namespace Enable.Extensions.FileSystem
     {
         private readonly CloudBlobContainer _container;
         private readonly BlobType _blobType;
+        private bool _createContainerIfNotExists;
 
         public AzureBlobStorage(
             string accountName,
             string accountKey,
             string containerName,
-            BlobType blobType)
+            BlobType blobType,
+            bool createContainerIfNotExists = false)
         {
             var credentials = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
@@ -28,20 +30,23 @@ namespace Enable.Extensions.FileSystem
 
             _container = client.GetContainerReference(containerName);
             _blobType = blobType;
+            _createContainerIfNotExists = createContainerIfNotExists;
         }
 
         public AzureBlobStorage(
             string accountName,
             string accountKey,
-            string containerName)
-            : this(accountName, accountKey, containerName, BlobType.BlockBlob)
+            string containerName,
+            bool createContainerIfNotExists = false)
+            : this(accountName, accountKey, containerName, BlobType.BlockBlob, createContainerIfNotExists)
         {
         }
 
         public AzureBlobStorage(
             CloudBlobClient client,
             string containerName,
-            BlobType blobType)
+            BlobType blobType,
+            bool createContainerIfNotExists = false)
         {
             if (client == null)
             {
@@ -50,6 +55,7 @@ namespace Enable.Extensions.FileSystem
 
             _container = client.GetContainerReference(containerName);
             _blobType = blobType;
+            _createContainerIfNotExists = createContainerIfNotExists;
         }
 
         public AzureBlobStorage(CloudBlobClient client, string containerName)
@@ -62,7 +68,10 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync();
+            if (_createContainerIfNotExists)
+            {
+                await _container.CreateIfNotExistsAsync();
+            }
 
             var sourceBlob = GetBlobReference(sourcePath);
             var targetBlob = GetBlobReference(targetPath);
@@ -126,7 +135,10 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync();
+            if (_createContainerIfNotExists)
+            {
+                await _container.CreateIfNotExistsAsync();
+            }
 
             var blob = GetBlobReference(path);
 
@@ -137,7 +149,10 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync();
+            if (_createContainerIfNotExists)
+            {
+                await _container.CreateIfNotExistsAsync();
+            }
 
             // The implementation of this method differs from the File Storage implementation.
             // With Blob Storage there is no concept of a "directory". Path segments in file names
@@ -175,7 +190,10 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync();
+            if (_createContainerIfNotExists)
+            {
+                await _container.CreateIfNotExistsAsync();
+            }
 
             var blob = GetBlobReference(path);
 
@@ -197,7 +215,10 @@ namespace Enable.Extensions.FileSystem
             string path,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync();
+            if (_createContainerIfNotExists)
+            {
+                await _container.CreateIfNotExistsAsync();
+            }
 
             var blob = GetBlobReference(path);
 
@@ -209,7 +230,10 @@ namespace Enable.Extensions.FileSystem
             string targetPath,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync();
+            if (_createContainerIfNotExists)
+            {
+                await _container.CreateIfNotExistsAsync();
+            }
 
             var sourceBlob = GetBlobReference(sourcePath);
 
@@ -226,7 +250,10 @@ namespace Enable.Extensions.FileSystem
             Stream stream,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            await _container.CreateIfNotExistsAsync();
+            if (_createContainerIfNotExists)
+            {
+                await _container.CreateIfNotExistsAsync();
+            }
 
             var blob = GetBlobReference(path);
 
