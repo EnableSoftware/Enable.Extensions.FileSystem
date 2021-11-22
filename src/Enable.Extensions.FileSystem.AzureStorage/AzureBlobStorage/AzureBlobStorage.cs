@@ -28,8 +28,8 @@ namespace Enable.Extensions.FileSystem
             string accountName,
             string accountKey,
             string containerName,
-            bool createContainerIfNotExists)
-            : this(accountName, accountKey, containerName, BlobType.BlockBlob, createContainerIfNotExists)
+            BlobType blobType)
+            : this(accountName, accountKey, containerName, blobType, false)
         {
         }
 
