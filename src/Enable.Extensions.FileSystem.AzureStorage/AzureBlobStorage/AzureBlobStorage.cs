@@ -19,9 +19,26 @@ namespace Enable.Extensions.FileSystem
         public AzureBlobStorage(
             string accountName,
             string accountKey,
+            string containerName)
+            : this(accountName, accountKey, containerName, BlobType.BlockBlob, false)
+        {
+        }
+
+        public AzureBlobStorage(
+            string accountName,
+            string accountKey,
+            string containerName,
+            bool createContainerIfNotExists)
+            : this(accountName, accountKey, containerName, BlobType.BlockBlob, createContainerIfNotExists)
+        {
+        }
+
+        public AzureBlobStorage(
+            string accountName,
+            string accountKey,
             string containerName,
             BlobType blobType,
-            bool createContainerIfNotExists = false)
+            bool createContainerIfNotExists)
         {
             var credentials = new StorageCredentials(accountName, accountKey);
             var storageAccount = new CloudStorageAccount(credentials, useHttps: true);
@@ -34,11 +51,17 @@ namespace Enable.Extensions.FileSystem
         }
 
         public AzureBlobStorage(
-            string accountName,
-            string accountKey,
+            CloudBlobClient client,
+            string containerName)
+            : this(client, containerName, BlobType.BlockBlob, false)
+        {
+        }
+
+        public AzureBlobStorage(
+            CloudBlobClient client,
             string containerName,
-            bool createContainerIfNotExists = false)
-            : this(accountName, accountKey, containerName, BlobType.BlockBlob, createContainerIfNotExists)
+            BlobType blobType)
+            : this(client, containerName, blobType, false)
         {
         }
 
@@ -46,7 +69,7 @@ namespace Enable.Extensions.FileSystem
             CloudBlobClient client,
             string containerName,
             BlobType blobType,
-            bool createContainerIfNotExists = false)
+            bool createContainerIfNotExists)
         {
             if (client == null)
             {
@@ -56,11 +79,6 @@ namespace Enable.Extensions.FileSystem
             _container = client.GetContainerReference(containerName);
             _blobType = blobType;
             _createContainerIfNotExists = createContainerIfNotExists;
-        }
-
-        public AzureBlobStorage(CloudBlobClient client, string containerName)
-            : this(client, containerName, BlobType.BlockBlob)
-        {
         }
 
         public override async Task CopyFileAsync(
