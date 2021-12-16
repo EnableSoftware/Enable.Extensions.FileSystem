@@ -1,6 +1,6 @@
 # Enable.Extensions.FileSystem
 
-[![Build status](https://ci.appveyor.com/api/projects/status/prwu1wi9g23p7p5a/branch/master?svg=true)](https://ci.appveyor.com/project/EnableSoftware/enable-extensions-filesystem/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/prwu1wi9g23p7p5a/branch/main?svg=true)](https://ci.appveyor.com/project/EnableSoftware/enable-extensions-filesystem/branch/main)
 
 File system abstractions for building testable applications.
 
@@ -134,3 +134,4 @@ do as the third parameter to the `AzureBlobStorage` constructor.
 [`Enable.Extensions.FileSystem.Abstractions`]: https://www.nuget.org/packages/Enable.Extensions.FileSystem.Abstractions/
 [`Enable.Extensions.FileSystem.AzureStorage`]: https://www.nuget.org/packages/Enable.Extensions.FileSystem.AzureStorage/
 [`Enable.Extensions.FileSystem.Physical`]: https://www.nuget.org/packages/Enable.Extensions.FileSystem.Physical/
+
